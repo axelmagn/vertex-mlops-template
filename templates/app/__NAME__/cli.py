@@ -8,11 +8,6 @@ _COMMANDS_PARSER = _PARSER.add_subparsers(title="commands", dest="command")
 
 
 def command(args=[], parent=_COMMANDS_PARSER):
-    """
-    Decorator for CLI commands. 
-
-    see commands.py for examples.
-    """
     def decorator(func):
         parser = parent.add_parser(func.__name__, description=func.__doc__)
         for arg in args:
@@ -22,5 +17,4 @@ def command(args=[], parent=_COMMANDS_PARSER):
 
 
 def arg(*args, **kwargs):
-    """Argument packaging function for command decorator"""
     return ([*args], kwargs)

@@ -20,9 +20,10 @@ class TemplateTreeJob(object):
         "overwrite",
     ]
 
-    def __init__(self, template_root: str, target_root: str, exists_policy: str = "error", sub_name: Optional[str] = None):
+    def __init__(self, template_root: str, target_root: str, template_context={}, exists_policy: str = "error", sub_name: Optional[str] = None):
         self.template_root = template_root
         self.target_root = target_root
+        self.template_context = template_context
 
         if exists_policy not in self.VALID_EXISTS_POLICIES:
             valid_policies_str = ", ".join(self.VALID_EXISTS_POLICIES)
@@ -37,7 +38,7 @@ class TemplateTreeJob(object):
         env = Environment(loader=loader,
                           autoescape=select_autoescape())
 
-        # TODO(axelmagn): apply templates in each directory
+        # apply templates in each directory
         for dir_name, _, file_list in os.walk(self.template_root):
 
             relative_dir = dir_name[len(self.template_root):]
@@ -62,7 +63,7 @@ class TemplateTreeJob(object):
                     elif(self.exists_policy == "overwrite"):
                         template = env.get_template(file_load_path)
                         with open(file_write_path, 'w') as f:
-                            f.write(template.render())
+                            f.write(template.render(**self.template_context))
                         logging.info(
                             f"{file_write_path} - OVERWRITTEN")
                     else:
@@ -73,7 +74,7 @@ class TemplateTreeJob(object):
                 else:
                     template = env.get_template(file_load_path)
                     with open(file_write_path, 'w') as f:
-                        f.write(template.render())
+                        f.write(template.render(**self.template_context))
                     logging.info(f"{file_write_path} - CREATED")
 
     def _ensure_dir(self, directory: str):

@@ -10,7 +10,7 @@ from .templating import TemplateTreeJob
     arg("-n", "--name", help="Name to use in substitution"),
 
 ])
-def apply_template(args):
+def apply_template(args, tail):
     job = TemplateTreeJob(
         args.template_path,
         args.target_path,
@@ -18,3 +18,10 @@ def apply_template(args):
         sub_name=args.name,
     )
     job.run()
+
+
+@command([
+    arg("name", help="App Name", type=str),
+])
+def start_app(args, tail):
+    pass

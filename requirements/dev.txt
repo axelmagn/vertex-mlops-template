@@ -1,2 +1,0 @@
--r base.txt
-jinja2~=3.0.1
