@@ -1,16 +1,22 @@
 from genericpath import exists
 import logging
 import os
-from typing import Optional
+from typing import Optional, Dict, Any
+import pathlib
 
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
-NAME_SUBSTITUTION_MARKER = "__NAME__"
+
+def get_templates_dir():
+    # use the `templates` dir that is a sibling to this file
+    path = os.path.abspath(__file__)
+    path = os.path.dirname(path)
+    return os.path.join(path, 'templates')
 
 
 class TemplateTreeJob(object):
     """
-    Reproduces a templated file tree into a target directory, making 
+    Reproduces a templated file tree into a target directory, making
     necessary substitutions.
     """
 
@@ -20,7 +26,14 @@ class TemplateTreeJob(object):
         "overwrite",
     ]
 
-    def __init__(self, template_root: str, target_root: str, template_context={}, exists_policy: str = "error", sub_name: Optional[str] = None):
+    def __init__(
+        self,
+        template_root: str,
+        target_root: str,
+        template_context: Dict[str, Any] = {},
+        filename_substitutions: Dict[str, str] = {},
+        exists_policy: str = "error"
+    ):
         self.template_root = template_root
         self.target_root = target_root
         self.template_context = template_context
@@ -31,9 +44,12 @@ class TemplateTreeJob(object):
                 f"exists_policy must be one of: {valid_policies_str}")
         self.exists_policy = exists_policy
 
-        self.sub_name = sub_name
+        self.filename_substitutions = filename_substitutions
 
     def run(self):
+        logging.info(
+            f"Rendering template: {self.template_root}->{self.target_root}")
+
         loader = FileSystemLoader(self.template_root)
         env = Environment(loader=loader,
                           autoescape=select_autoescape())
@@ -42,9 +58,9 @@ class TemplateTreeJob(object):
         for dir_name, _, file_list in os.walk(self.template_root):
 
             relative_dir = dir_name[len(self.template_root):]
-            target_dir = os.path.join(self.target_root, relative_dir)
-            if self.sub_name is not None:
-                target_dir = self._substitute_name(target_dir)
+            target_dir = self._substitute_name(relative_dir)
+            target_dir = os.path.join(self.target_root, target_dir)
+            print(f"{self.target_root}+{relative_dir}->{target_dir}")  # DEBUG
             self._ensure_dir(target_dir)
 
             for file_name in file_list:
@@ -87,12 +103,17 @@ class TemplateTreeJob(object):
             logging.info(f"{directory} - EXISTS")
 
     def _substitute_name(self, path: str):
+        # guard against empty string
+        if not path:
+            return path
+
         # recursively split up the path and perform substitution
         def split_sub_all(path):
-            if not path:
+            if not path or path == "/":
                 return tuple()
             (head, tail) = os.path.split(path)
-            if tail == NAME_SUBSTITUTION_MARKER:
-                tail = self.sub_name
+            if tail in self.filename_substitutions:
+                tail = self.filename_substitutions[tail]
             return split_sub_all(head) + (tail,)
+
         return os.path.join(*split_sub_all(path))

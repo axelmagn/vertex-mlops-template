@@ -8,6 +8,7 @@ _COMMANDS_PARSER = _PARSER.add_subparsers(title="commands", dest="command")
 
 
 def command(args=[], parent=_COMMANDS_PARSER):
+    # TODO(axelmagn): docstring
     def decorator(func):
         parser = parent.add_parser(func.__name__, description=func.__doc__)
         for arg in args:
@@ -17,4 +18,5 @@ def command(args=[], parent=_COMMANDS_PARSER):
 
 
 def arg(*args, **kwargs):
+    # TODO(axelmagn): docstring
     return ([*args], kwargs)

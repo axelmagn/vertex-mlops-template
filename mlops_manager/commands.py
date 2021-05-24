@@ -1,5 +1,10 @@
+import os
+import pathlib
+
+from jinja2 import FileSystemLoader
+
 from .cli import command, arg
-from .templating import TemplateTreeJob
+from .templating import TemplateTreeJob, get_templates_dir
 
 
 @command([
@@ -15,13 +20,28 @@ def apply_template(args, tail):
         args.template_path,
         args.target_path,
         exists_policy=args.exists_policy,
-        sub_name=args.name,
     )
     job.run()
 
 
 @command([
-    arg("name", help="App Name", type=str),
+    arg("--package_name", help="Package Name", type=str, required=True),
 ])
-def start_app(args, tail):
-    pass
+def init(args):
+    # TODO(axelmagn): docstring
+    template_root = os.path.join(get_templates_dir(), 'app')
+    target_root = pathlib.Path().absolute()
+
+    job = TemplateTreeJob(
+        template_root=template_root,
+        target_root=target_root,
+        exists_policy="error",
+        filename_substitutions={
+            "__PACKAGE_NAME__": args.package_name
+        },
+        template_context={
+            "PACKAGE_NAME": args.package_name
+        }
+        # TODO(axelmagn): template_context
+    )
+    job.run()
