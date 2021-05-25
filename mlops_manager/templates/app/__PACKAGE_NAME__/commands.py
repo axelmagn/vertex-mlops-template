@@ -1,10 +1,11 @@
 from . import pipelines
 from .cli import command, arg
-from config import Config
+from .config import Config
 from kfp.v2 import compiler
 from kfp.v2.google.client import AIPlatformClient
 import logging
 import os
+import importlib.util
 
 
 @command([
@@ -20,6 +21,7 @@ def example(args):
     arg("--pipeline_package_path", help="Output path for pipeline package", type=str),
 ])
 def run_pipeline(args):
+
     config = Config(config_root=args.config_dir,
                     config_environment=args.config_env)
 
