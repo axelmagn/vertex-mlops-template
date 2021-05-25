@@ -1,0 +1,4 @@
+google_cloud:
+  project: {{gcp_project}}
+  region: {{gcp_region}}
+  storage_root: {{gcp_storage_root}}

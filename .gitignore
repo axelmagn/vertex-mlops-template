@@ -139,3 +139,4 @@ model.png
 # virtualenv
 /venv
 /.venv
+/bin-tmp

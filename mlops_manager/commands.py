@@ -8,25 +8,15 @@ from .templating import TemplateTreeJob, get_templates_dir
 
 
 @command([
-    arg("template_path", help="Template Path", type=str),
-    arg("target_path", help="Target Path", type=str),
-    arg("--exists_policy", help="Policy for files that already exist",
-        default="error", choices=TemplateTreeJob.VALID_EXISTS_POLICIES),
-    arg("-n", "--name", help="Name to use in substitution"),
-
-])
-def apply_template(args, tail):
-    job = TemplateTreeJob(
-        args.template_path,
-        args.target_path,
-        exists_policy=args.exists_policy,
-    )
-    job.run()
-
-
-@command([
+    # TODO(axelmagn): handle required args interactively
     arg("--package_name", help="Package Name", type=str, required=True),
-    arg("--force", help="overwrite files rather than throwing an error", action="store_true"),
+    arg("--gcp_project", required=True),
+    arg("--gcp_region", required=True),
+    arg("--gcp_storage_root", required=True),
+
+    arg("--force", help="overwrite files rather than throwing an error",
+        action="store_true"),
+    arg("--target", help="target directory")
 ])
 def init(args):
     # TODO(axelmagn): docstring
@@ -45,8 +35,10 @@ def init(args):
             "__PACKAGE_NAME__": args.package_name
         },
         template_context={
-            "PACKAGE_NAME": args.package_name
+            "python_package_name": args.package_name,
+            "gcp_project": args.gcp_project,
+            "gcp_region": args.gcp_region,
+            "gcp_storage_root": args.gcp_storage_root,
         }
-        # TODO(axelmagn): template_context
     )
     job.run()

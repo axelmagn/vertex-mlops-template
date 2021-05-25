@@ -7,6 +7,7 @@ from typing import NamedTuple
 
 TIMESTAMP = datetime.now().strftime("%Y%m%d%H%M%S")
 
+
 @component
 def hello_world(text: str) -> str:
     print(text)
@@ -32,6 +33,7 @@ def two_outputs(
 @component
 def consumer(text1: str, text2: str, text3: str):
     print(f"text1: {text1}; text2: {text2}; text3: {text3}")
+
 
 @dsl.pipeline(
     name="hello-pipeline",
