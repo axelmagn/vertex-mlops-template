@@ -135,3 +135,8 @@ mlpipeline-ui-metadata.json
 *.csv
 *.sqllite
 model.png
+
+# virtualenv
+/venv
+/.venv
+/bin-tmp
