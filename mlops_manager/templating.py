@@ -60,7 +60,6 @@ class TemplateTreeJob(object):
             relative_dir = dir_name[len(self.template_root):]
             target_dir = self._substitute_name(relative_dir)
             target_dir = os.path.join(self.target_root, target_dir)
-            print(f"{self.target_root}+{relative_dir}->{target_dir}")  # DEBUG
             self._ensure_dir(target_dir)
 
             for file_name in file_list:

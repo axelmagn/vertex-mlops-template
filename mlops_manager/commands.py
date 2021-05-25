@@ -26,16 +26,21 @@ def apply_template(args, tail):
 
 @command([
     arg("--package_name", help="Package Name", type=str, required=True),
+    arg("--force", help="overwrite files rather than throwing an error", action="store_true"),
 ])
 def init(args):
     # TODO(axelmagn): docstring
     template_root = os.path.join(get_templates_dir(), 'app')
     target_root = pathlib.Path().absolute()
 
+    exists_policy = "error"
+    if args.force:
+        exists_policy = "overwrite"
+
     job = TemplateTreeJob(
         template_root=template_root,
         target_root=target_root,
-        exists_policy="error",
+        exists_policy=exists_policy,
         filename_substitutions={
             "__PACKAGE_NAME__": args.package_name
         },
