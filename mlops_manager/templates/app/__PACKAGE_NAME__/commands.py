@@ -18,10 +18,9 @@ def example(args):
 
 @command([
     arg("pipeline_id", help="The pipeline to run", type=str),
-    arg("--pipeline_package_path", help="Output path for pipeline package", type=str),
 ])
 def run_pipeline(args):
-
+    # TODO(axelmagn): docstring, logging
     config = Config(config_root=args.config_dir,
                     config_environment=args.config_env)
 
@@ -43,8 +42,12 @@ def run_pipeline(args):
 
     pipeline_storage_root = os.path.join(
         config.cloud['storage_root'], 'pipelines', args.pipeline_id)
+    pipeline_run_response_path = os.path.join(
+        build_dir, f"{args.pipeline_id}_run_response.json")
     response = api_client.create_run_from_job_spec(
         job_spec_path=pipeline_package_path,
         pipeline_root=pipeline_storage_root
     )
-    logging.trace(f"Created Pipeline Job: {response}")
+
+    with open(pipeline_run_response_path, 'w') as f:
+        f.write(response)
