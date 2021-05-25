@@ -1,9 +1,13 @@
 import setuptools
 import datetime
 
-PACKAGE_NAME = "{{python_package_name}}"
-REQUIRED_PACKAGES = []
-VERSION = "HEAD"  # TODO(axelmagn): determine dynamically
+PACKAGE_NAME = "{{app_name}}"
+# TODO(axelmagn): unify with requirements.txt
+REQUIRED_PACKAGES = [
+    "kfp~=1.6.2",
+    "PyYAML~=5.4.1",
+]
+VERSION = "0.0.1"  # TODO(axelmagn): determine dynamically
 
 
 def setup():

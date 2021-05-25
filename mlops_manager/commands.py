@@ -9,7 +9,7 @@ from .templating import TemplateTreeJob, get_templates_dir
 
 @command([
     # TODO(axelmagn): handle required args interactively
-    arg("--package_name", help="Package Name", type=str, required=True),
+    arg("--name", type=str, required=True),
     arg("--gcp_project", required=True),
     arg("--gcp_region", required=True),
     arg("--gcp_storage_root", required=True),
@@ -18,7 +18,7 @@ from .templating import TemplateTreeJob, get_templates_dir
         action="store_true"),
     arg("--target_root", help="target directory", default=".")
 ])
-def init(args):
+def start_app(args):
     # TODO(axelmagn): docstring
     template_root = os.path.join(get_templates_dir(), 'app')
 
@@ -31,10 +31,10 @@ def init(args):
         target_root=args.target_root,
         exists_policy=exists_policy,
         filename_substitutions={
-            "__PACKAGE_NAME__": args.package_name
+            "__APP_NAME__": args.name
         },
         template_context={
-            "python_package_name": args.package_name,
+            "app_name": args.name,
             "gcp_project_id": args.gcp_project,
             "gcp_region": args.gcp_region,
             "gcp_storage_root": args.gcp_storage_root,
