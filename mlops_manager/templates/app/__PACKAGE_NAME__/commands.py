@@ -6,6 +6,7 @@ from kfp.v2.google.client import AIPlatformClient
 import logging
 import os
 import importlib.util
+import yaml
 
 
 @command([
@@ -43,11 +44,11 @@ def run_pipeline(args):
     pipeline_storage_root = os.path.join(
         config.cloud['storage_root'], 'pipelines', args.pipeline_id)
     pipeline_run_response_path = os.path.join(
-        build_dir, f"{args.pipeline_id}_run_response.json")
+        build_dir, f"{args.pipeline_id}_run_response.yaml")
     response = api_client.create_run_from_job_spec(
         job_spec_path=pipeline_package_path,
         pipeline_root=pipeline_storage_root
     )
 
     with open(pipeline_run_response_path, 'w') as f:
-        f.write(response)
+        f.write(yaml.safe_dump(response))
