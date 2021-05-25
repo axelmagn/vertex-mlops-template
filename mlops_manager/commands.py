@@ -16,12 +16,11 @@ from .templating import TemplateTreeJob, get_templates_dir
 
     arg("--force", help="overwrite files rather than throwing an error",
         action="store_true"),
-    arg("--target", help="target directory")
+    arg("--target_root", help="target directory", default=".")
 ])
 def init(args):
     # TODO(axelmagn): docstring
     template_root = os.path.join(get_templates_dir(), 'app')
-    target_root = pathlib.Path().absolute()
 
     exists_policy = "error"
     if args.force:
@@ -29,14 +28,14 @@ def init(args):
 
     job = TemplateTreeJob(
         template_root=template_root,
-        target_root=target_root,
+        target_root=args.target_root,
         exists_policy=exists_policy,
         filename_substitutions={
             "__PACKAGE_NAME__": args.package_name
         },
         template_context={
             "python_package_name": args.package_name,
-            "gcp_project": args.gcp_project,
+            "gcp_project_id": args.gcp_project,
             "gcp_region": args.gcp_region,
             "gcp_storage_root": args.gcp_storage_root,
         }

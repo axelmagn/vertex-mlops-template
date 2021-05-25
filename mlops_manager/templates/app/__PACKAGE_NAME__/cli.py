@@ -1,13 +1,21 @@
 from argparse import ArgumentParser
 
-_PARSER = ArgumentParser()
-_PARSER.add_argument("--log_level", help="Specify log level", type=str,
-                     choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
-                     default="INFO")
-_COMMANDS_PARSER = _PARSER.add_subparsers(title="commands", dest="command")
+PARSER = ArgumentParser()
+PARSER.add_argument("--log_level", type=str,
+                    help="level of detail during logging",
+                    choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
+                    default="INFO")
+PARSER.add_argument(
+    "--build_dir", help="output directory for build targets.", default="./build")
+PARSER.add_argument(
+    "--config_dir", help="configuration root directory", default="./config")
+PARSER.add_argument(
+    "--config_env", help="configuration environment")
+
+COMMANDS_PARSER = PARSER.add_subparsers(title="commands", dest="command")
 
 
-def command(args=[], parent=_COMMANDS_PARSER):
+def command(args=[], parent=COMMANDS_PARSER):
     # TODO(axelmagn): docstring
     def decorator(func):
         parser = parent.add_parser(func.__name__, description=func.__doc__)
