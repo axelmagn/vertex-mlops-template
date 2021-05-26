@@ -13,7 +13,8 @@ from kfp.v2.dsl import (
 )
 
 
-@component
+# TODO(axelmagn): use built app image
+@component(base_image="gcr.io/deeplearning-platform-release/tf2-cpu.2-5")
 def example_gen(
     train_dataset_raw: Output[Dataset],
     test_dataset_raw: Output[Dataset],
@@ -42,8 +43,10 @@ def example_gen(
     with open(test_dataset_raw.path, 'wb') as f:
         np.savez(f, images=test_images, labels=test_labels)
 
+# TODO(axelmagn): use built app image
 
-@component
+
+@component(base_image="gcr.io/deeplearning-platform-release/tf2-cpu.2-5")
 def preprocess(
     raw_dataset: Input[Dataset],
     clean_dataset: Output[Dataset],
@@ -52,8 +55,8 @@ def preprocess(
 
     with open(raw_dataset.path, 'rb') as f:
         npzfile = np.load(f)
-    images = npzfile['images']
-    labels = npzfile['labels']
+        images = npzfile['images']
+        labels = npzfile['labels']
 
     # normalize images
     images = images / 255.0
@@ -62,7 +65,8 @@ def preprocess(
         np.savez(f, images=images, labels=labels)
 
 
-@component
+# TODO(axelmagn): use built app image
+@component(base_image="gcr.io/deeplearning-platform-release/tf2-cpu.2-5")
 def train(
     train_dataset_clean: Input[Dataset],
     trained_model: Output[Model],
@@ -74,8 +78,8 @@ def train(
 
     with open(train_dataset_clean.path, 'rb') as f:
         npzfile = np.load(f)
-    train_images = npzfile['images']
-    train_labels = npzfile['labels']
+        train_images = npzfile['images']
+        train_labels = npzfile['labels']
 
     # Define the model using Keras.
     model = keras.Sequential([
@@ -92,17 +96,15 @@ def train(
     # Run a training job with specified number of epochs
     train_history = model.fit(train_images, train_labels, epochs=10)
     for history_key in train_history.history:
-        try:
-            metrics.log_metric(f"train_{history_key}", float(
-                train_history.history[history_key]))
-        except ValueError:
-            # if for some reason train_history has a non-numerical value, skip logging it as a metric
-            pass
+        history_value = train_history.history[history_key]
+        if isinstance(history_value, int) or isinstance(history_value, float):
+            metrics.log_metric(f"train_{history_key}", float(history_value))
 
     model.save(trained_model.path)
 
 
-@component
+# TODO(axelmagn): use built app image
+@component(base_image="gcr.io/deeplearning-platform-release/tf2-cpu.2-5")
 def evaluate(
     test_dataset_clean: Input[Dataset],
     trained_model: Input[Model],
@@ -113,8 +115,8 @@ def evaluate(
 
     with open(test_dataset_clean.path, 'rb') as f:
         npzfile = np.load(f)
-    test_images = npzfile['images']
-    test_labels = npzfile['labels']
+        test_images = npzfile['images']
+        test_labels = npzfile['labels']
 
     model = keras.models.load_model(trained_model.path)
 
@@ -134,10 +136,10 @@ def fashion_mnist_pipeline():
     test_dataset_raw = eg_task.outputs['test_dataset_raw']
 
     train_preprocess_task = preprocess(train_dataset_raw)
-    train_dataset_clean = train_preprocess_task.outputs['train_dataset_clean']
+    train_dataset_clean = train_preprocess_task.outputs['clean_dataset']
 
     test_preprocess_task = preprocess(test_dataset_raw)
-    test_dataset_clean = test_preprocess_task.outputs['test_dataset_clean']
+    test_dataset_clean = test_preprocess_task.outputs['clean_dataset']
 
     train_task = train(train_dataset_clean)
     trained_model = train_task.outputs['trained_model']

@@ -1,1 +1,2 @@
 from .hello_pipeline import hello_pipeline
+from .fashion_mnist_pipeline import fashion_mnist_pipeline

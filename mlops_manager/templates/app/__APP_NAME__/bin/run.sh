@@ -16,5 +16,5 @@ then
 fi
 
 pushd "${PROJECT_DIR}" > /dev/null
-"${PYTHON_CMD}" -m {{python_package_name}} "${@}"
+"${PYTHON_CMD}" -m {{app_name}} "${@}"
 popd > /dev/null
