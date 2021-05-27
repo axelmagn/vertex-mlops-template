@@ -1,0 +1,5 @@
+base_cpu:
+  image_name: gcr.io/{{gcp_project_id}}/{{app_name}}-cpu
+  dockerfile: Dockerfile
+  build_args:
+    accelerator: cpu

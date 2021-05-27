@@ -10,7 +10,7 @@ PARSER.add_argument(
 PARSER.add_argument(
     "--config_dir", help="configuration root directory", default="./config")
 PARSER.add_argument(
-    "--config_env", help="configuration environment")
+    "--deployment", help="configuration environment")
 
 COMMANDS_PARSER = PARSER.add_subparsers(title="commands", dest="command")
 

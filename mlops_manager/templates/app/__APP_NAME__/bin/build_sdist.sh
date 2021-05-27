@@ -1,7 +1,6 @@
 #!/bin/bash
 #
-# invoke the app CLI
-
+# Build the python source distribution package
 set -exuo pipefail
 
 readonly PROJECT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )/.." &> /dev/null && pwd )"
@@ -18,5 +17,6 @@ then
 fi
 
 pushd "${PROJECT_DIR}" > /dev/null
-"${PYTHON_CMD}" -m {{app_name}} "${@}"
+"${PYTHON_CMD}" setup.py sdist
+cp dist/{{app_name}}-*.tar.gz {{app_name}}.tar.gz
 popd > /dev/null

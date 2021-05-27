@@ -9,16 +9,16 @@ DEFAULT_CONFIG_ROOT = os.path.dirname(os.path.realpath(__file__))
 class Config(object):
     # TODO(axelmagn): docstring
 
-    FILE_MATCHER = re.compile(r"(?P<name>\w+)\.ya?ml$")
+    FILE_MATCHER = re.compile(r"(?P<name>\w+)\.ya?ml")
 
     def __init__(
         self,
         config_root: str = DEFAULT_CONFIG_ROOT,
-        config_environment: Optional[str] = None
+        deployment: Optional[str] = None
     ):
         # TODO(axelmagn): docstring
         self.config_root = config_root
-        self.config_env = config_environment
+        self.deployment = deployment
         self._configs = {}
         self.load_configs()
 
@@ -26,10 +26,10 @@ class Config(object):
         # TODO(axelmagn): docstring
         for config_file in sorted(os.listdir(self.config_root)):
             self.load_file_if_yaml(config_file)
-        if self.config_env is not None:
-            config_env_root = os.path.join(
-                self.config_root, "environments", self.config_env)
-            for config_file in sorted(os.listdir(config_env_root)):
+        if self.deployment is not None:
+            deployment_root = os.path.join(
+                self.config_root, "environments", self.deployment)
+            for config_file in sorted(os.listdir(deployment_root)):
                 self.load_file_if_yaml(config_file)
 
     def load_file_if_yaml(self, config_file: str):

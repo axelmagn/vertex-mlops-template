@@ -1,0 +1,39 @@
+steps:
+  # TODO(axelmagn): unit testing
+
+  - id: make_python_package
+    name: python
+    entrypoint: python
+    args: ["setup.py", "sdist"]
+
+  - id: make_cpu_image
+    name: 'gcr.io/cloud-builders/docker'
+    args: ['build', '-t', "${_CPU_IMAGE_NAME}:${_CPU_IMAGE_TAG}", '.']
+    waitFor: ['make_python_package']
+
+  - id: push_cpu_image
+    name: 'gcr.io/cloud-builders/docker'
+    args: ['push', "${_CPU_IMAGE_NAME}:${_CPU_IMAGE_TAG}", '.']
+    waitFor: ['make_cpu_image']
+
+  - id: make_gpu_image
+    name: 'gcr.io/cloud-builders/docker'
+    args: ['build', '-t', "${_GPU_IMAGE_NAME}:${_GPU_IMAGE_TAG}", '.']
+    waitFor: ['make_python_package']
+
+  - id: push_gpu_image
+    name: 'gcr.io/cloud-builders/docker'
+    args: ['push', "${_GPU_IMAGE_NAME}:${_GPU_IMAGE_TAG}", '.']
+    waitFor: ['make_gpu_image']
+
+timeout: 1200s
+
+artifacts:
+  objects:
+    # TODO(axelmagn): dynamic bucket
+    location: gs://${_BUCKET_NAME}/${_APP_NAME}/build/${BUILD_ID}
+    paths:
+      # TODO(axelmagn): dynamic versioning 
+      - dist/${_APP_NAME}-${_DIST_VERSION}.tar.gz
+images:
+  - us-central1-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO_NAME}/${_APP_NAME}:${_DIST_VERSION}
