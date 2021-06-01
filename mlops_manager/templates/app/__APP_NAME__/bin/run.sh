@@ -2,8 +2,6 @@
 #
 # invoke the app CLI
 
-set -exuo pipefail
-
 readonly PROJECT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )/.." &> /dev/null && pwd )"
 
 PYTHON_CMD="python"

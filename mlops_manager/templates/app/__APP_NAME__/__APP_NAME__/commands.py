@@ -23,7 +23,7 @@ def example(args):
 def run_pipeline(args):
     # TODO(axelmagn): docstring, logging
     config = Config(config_root=args.config_dir,
-                    deployment=args.deployment)
+                    config_environment=args.config_env)
 
     pipeline_func = getattr(pipelines, args.pipeline_id)
     build_dir = os.path.join(args.build_dir, "pipelines", args.pipeline_id)
