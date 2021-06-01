@@ -53,3 +53,26 @@ gcloud builds submit \
 ```
 
 
+## Q&A
+
+### How is code in this project organized?
+
+This repository can be used as the beginning of an ML *Project* which
+holds your team's ML source code.  *Projects* are made up of one or more
+*Apps*, which are self-contained code bases that solve a particular ML problem.
+In order to solve that problem, *Apps* need to perform a variety of *Tasks*.
+*Tasks* can be hierarchical: for example one task may be to launch a pipeline 
+job, while another may be to perform the contents of a pipeline component, and
+that pipeline component may itself be launching a training task on Vertex 
+Training. For this reason, task should be stateless, and rely on Vertex AI for 
+managing the state of the App.  When tasks need to be automated or executed as
+part of a workflow, Cloud Build is leveraged as a deployment tool.
+
+### Why use YAML configs rather than environment variables?
+
+ML applications often involve multiple tasks running on multiple services.
+Environment variables, while commonly used to configure services in the [twelve
+factor app](https://12factor.net/) methodology, become brittle when required to
+be propagated to subtasks.  By consolidating configuration into yaml files, we
+can obviate the need to propagate environment variables.
+
