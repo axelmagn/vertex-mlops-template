@@ -19,6 +19,3 @@ cloud:
   region: {{gcp_region}}
   # GCP Storage path to use as root for all runtime files
   storage_root: {{gcp_storage_root}}
-
-release:
-  image: gcr.io/{{gcp_project_id}}/{{app_name}}

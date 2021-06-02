@@ -16,9 +16,12 @@ def main():
     if args.command is None:
         cli.PARSER.print_help()
     else:
+        # load args globally
+        cli.init_global_args(args)
         # load config globally
         config.init_global_config(args.config_files)
-        # invoke command
+        # invoke command. Although args could be retrieved with cli.get_args, we
+        # pass it explicitly as a convenience.
         args.func(args)
 
 
