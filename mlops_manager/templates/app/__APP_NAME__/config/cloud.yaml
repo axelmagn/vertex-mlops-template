@@ -1,3 +1,0 @@
-project_id: {{gcp_project_id}}
-region: {{gcp_region}}
-storage_root: {{gcp_storage_root}}

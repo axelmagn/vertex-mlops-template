@@ -1,6 +1,5 @@
-from . import pipelines
+from . import pipelines, config
 from .cli import command, arg
-from .config import Config
 from kfp.v2 import compiler
 from kfp.v2.google.client import AIPlatformClient
 import logging
@@ -14,6 +13,7 @@ import yaml
 ])
 def example(args):
     # TODO(axelmagn): docstring
+    project_id = config.CONFIG['cloud']['project_id']
     print(f"You said '{args.echo}'")
 
 
@@ -21,10 +21,6 @@ def example(args):
     arg("pipeline_id", help="The pipeline to run", type=str),
 ])
 def run_pipeline(args):
-    # TODO(axelmagn): docstring, logging
-    config = Config(config_root=args.config_dir,
-                    config_environment=args.config_env)
-
     pipeline_func = getattr(pipelines, args.pipeline_id)
     build_dir = os.path.join(args.build_dir, "pipelines", args.pipeline_id)
     os.makedirs(build_dir, exist_ok=True)
@@ -37,12 +33,12 @@ def run_pipeline(args):
     )
 
     api_client = AIPlatformClient(
-        project_id=config.cloud['project_id'],
-        region=config.cloud['region'],
+        project_id=config.CONFIG['cloud']['project_id'],
+        region=config.CONFIG['cloud']['region'],
     )
 
     pipeline_storage_root = os.path.join(
-        config.cloud['storage_root'], 'pipelines', args.pipeline_id)
+        config.CONFIG['cloud']['storage_root'], 'pipelines', args.pipeline_id)
     pipeline_run_response_path = os.path.join(
         build_dir, f"{args.pipeline_id}_run_response.yaml")
     response = api_client.create_run_from_job_spec(

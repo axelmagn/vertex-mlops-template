@@ -1,6 +1,7 @@
 import logging
 
-from . import cli, commands
+from . import commands  # even if unused, this loads commands into parser
+from . import cli, config
 
 
 def main():
@@ -15,6 +16,9 @@ def main():
     if args.command is None:
         cli.PARSER.print_help()
     else:
+        # load config globally
+        config.init_global_config(args.config_files)
+        # invoke command
         args.func(args)
 
 

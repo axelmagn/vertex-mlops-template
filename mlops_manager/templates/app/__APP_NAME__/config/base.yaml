@@ -1,0 +1,24 @@
+# the name of the app.  This becomes the root name of all artifacts related to 
+# the app.
+app_name: {{app_name}}
+
+# Secrets can be stored in environment variables, or Cloud Secret Manager.
+# Configuration manager will check first for environment variables, 
+# then for secrets in secret manager. Secret manager is only checked if the 
+# flag `--enable-secret-manager` is passed during invocation.
+# 
+# TODO(axelmagn): implement secret handling in config.py
+# TODO(axelmagn): articulate secret definition format
+secrets:
+
+# Google Cloud Configurations
+cloud:
+  # GCP Project ID
+  project_id: {{gcp_project_id}}
+  # GCP Region used for all regionalized tasks and artifacts.
+  region: {{gcp_region}}
+  # GCP Storage path to use as root for all runtime files
+  storage_root: {{gcp_storage_root}}
+
+release:
+  image: gcr.io/{{gcp_project_id}}/{{app_name}}

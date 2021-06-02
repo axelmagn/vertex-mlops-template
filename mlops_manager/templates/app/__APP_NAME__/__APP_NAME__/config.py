@@ -1,42 +1,39 @@
-import os
 import yaml
-import re
-from typing import Any, Optional
+import sys
+from typing import Any, List
 
-DEFAULT_CONFIG_ROOT = os.path.dirname(os.path.realpath(__file__))
+
+def init_global_config(*args, **kwargs):
+    """Initialize the CONFIG global as a new Config object with passed args."""
+    global CONFIG
+    CONFIG = Config(*args, **kwargs)
 
 
 class Config(object):
     # TODO(axelmagn): docstring
+    def __init__(self, config_file_paths: List[str] = []):
+        """Config constructor.
 
-    FILE_MATCHER = re.compile(r"(?P<name>\w+)\.ya?ml$")
+        Args:
+            config_file_paths:  Paths to configuration files to be loaded in 
+                                order.
+        """
+        self._config = {}
+        for path in config_file_paths:
+            self.load_config(path)
 
-    def __init__(
-        self,
-        config_root: str = DEFAULT_CONFIG_ROOT,
-        config_environment: Optional[str] = None
-    ):
-        # TODO(axelmagn): docstring
-        self.config_root = config_root
-        self.config_env = config_environment
-        self._configs = {}
-        self.load_configs()
+    def load_config(self, config_path: str):
+        """Load a config file.
 
-    def load_configs(self):
-        # TODO(axelmagn): docstring
-        for config_file in sorted(os.listdir(self.config_root)):
-            self.load_file_if_yaml(config_file)
-        if self.config_env is not None:
-            config_env_root = os.path.join(
-                self.config_root, "environments", self.config_env)
-            for config_file in sorted(os.listdir(config_env_root)):
-                self.load_file_if_yaml(config_file)
+        Conflicting top-level keys in the existing config are overwritten with
+        the contents of the new config.  
 
-    def load_file_if_yaml(self, config_file: str):
-        # TODO(axelmagn): docstring
-        match = self.FILE_MATCHER.match(config_file)
-        if match is not None:
-            name = match.group("name")
-            path = os.path.join(self.config_root, config_file)
-            with open(path, 'r') as f:
-                setattr(self, name, yaml.safe_load(f))
+        Args:
+            config_path: path of the config file to load.
+        """
+        with open(config_path, 'r') as f:
+            _config = yaml.safe_load(f)
+        self._config.update(_config)
+
+    def __getitem__(self, key):
+        return self._config[key]
