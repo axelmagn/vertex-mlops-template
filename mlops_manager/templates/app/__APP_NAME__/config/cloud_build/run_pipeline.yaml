@@ -17,7 +17,7 @@ steps:
   - id: run_pipeline
     name: 'us-central1-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO_NAME}/${_APP_NAME}:${_DIST_VERSION}'
     entrypoint: 'python'
-    args: ['-m', '${_APP_NAME}', 'run_pipeline', '${_PIPELINE_NAME}']
+    args: ['-m', '${_APP_NAME}', '--config-file', 'config/base.yaml', 'run_pipeline', '${_PIPELINE_NAME}']
 
 timeout: 1200s
 
