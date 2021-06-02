@@ -140,4 +140,6 @@ model.png
 /venv
 /.venv
 /bin-tmp
-/.vscode
+
+# Visual Studio Code
+.vscode
