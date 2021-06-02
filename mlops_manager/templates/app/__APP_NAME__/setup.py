@@ -6,6 +6,8 @@ PACKAGE_NAME = "{{app_name}}"
 REQUIRED_PACKAGES = [
     "kfp~=1.6.2",
     "PyYAML~=5.4.1",
+    "tensorflow~=2.5.0",
+    # "numpy~=1.20.3",
 ]
 VERSION = "0.0.1"  # TODO(axelmagn): determine dynamically
 

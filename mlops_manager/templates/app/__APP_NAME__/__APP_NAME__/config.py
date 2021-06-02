@@ -9,7 +9,7 @@ DEFAULT_CONFIG_ROOT = os.path.dirname(os.path.realpath(__file__))
 class Config(object):
     # TODO(axelmagn): docstring
 
-    FILE_MATCHER = re.compile(r"(?P<name>\w+)\.ya?ml")
+    FILE_MATCHER = re.compile(r"(?P<name>\w+)\.ya?ml$")
 
     def __init__(
         self,
