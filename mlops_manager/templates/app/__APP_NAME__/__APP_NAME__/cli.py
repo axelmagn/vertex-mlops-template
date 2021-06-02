@@ -16,6 +16,16 @@ PARSER.add_argument("-c", "--config-file",
 COMMANDS_PARSER = PARSER.add_subparsers(title="commands", dest="command")
 
 
+def init_global_args(args):
+    global _ARGS
+    _ARGS = args
+
+
+def get_args():
+    global _ARGS
+    return _ARGS
+
+
 def command(args=[], parent=COMMANDS_PARSER):
     """Decorator to denote functions that act as CLI commands."""
     def decorator(func):

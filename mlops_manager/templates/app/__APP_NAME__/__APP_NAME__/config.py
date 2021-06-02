@@ -2,11 +2,19 @@ import yaml
 import sys
 from typing import Any, List
 
+_CONFIG = None
+
 
 def init_global_config(*args, **kwargs):
     """Initialize the CONFIG global as a new Config object with passed args."""
-    global CONFIG
-    CONFIG = Config(*args, **kwargs)
+    global _CONFIG
+    _CONFIG = Config(*args, **kwargs)
+
+
+def get_config():
+    """Retrieve the global config"""
+    global _CONFIG
+    return _CONFIG
 
 
 class Config(object):
