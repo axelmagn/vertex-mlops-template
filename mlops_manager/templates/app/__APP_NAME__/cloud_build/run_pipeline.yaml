@@ -1,5 +1,8 @@
 steps:
   # TODO(axelmagn): unit testing
+  - id: unit_tests
+    name: python
+    args: ["pytest"]
 
   - id: make_python_package
     name: python

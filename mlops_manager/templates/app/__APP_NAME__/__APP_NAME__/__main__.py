@@ -19,7 +19,7 @@ def main():
         # load args globally
         cli.init_global_args(args)
         # load config globally
-        config.init_global_config(args.config_files)
+        config.init_global_config(config_file_paths=args.config_files)
         # invoke command. Although args could be retrieved with cli.get_args, we
         # pass it explicitly as a convenience.
         args.func(args)

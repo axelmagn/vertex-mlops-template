@@ -1,11 +1,12 @@
 from . import pipelines
-from .config import get_config
 from .cli import command, arg
+from .config import get_config
+from .pipelines.runner import PipelineRunner
 from kfp.v2 import compiler
 from kfp.v2.google.client import AIPlatformClient
+import importlib.util
 import logging
 import os
-import importlib.util
 import yaml
 
 
@@ -17,6 +18,23 @@ def example(args):
     config = get_config()
     project_id = config['cloud']['project_id']
     print(f"You said '{args.echo}'")
+
+
+@command([
+    arg("pipeline",
+        help=("Pipeline ID corresponding to key in pipelines"
+              + "section of config file."),
+        type=str),
+    arg("-o", "--output-dir", help="output directory", type=str, required=True),
+])
+def build_pipeline(args):
+    config = get_config()
+    os.makedirs(args.output_dir, exist_ok=True)
+    pipeline_job_path = PipelineRunner().build_pipeline(
+        pipeline_id=args.pipeline,
+        output_dir=args.output_dir,
+    )
+    logging.info(f"Wrote compiled pipeline: {pipeline_job_path}")
 
 
 @command([

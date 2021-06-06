@@ -1,7 +1,5 @@
 # TODO(axelmagn): delete in favor of standalone pipeline template
-from datetime import datetime
 from kfp import dsl
-from typing import NamedTuple
 
 from kfp.v2.dsl import (
     Dataset,
