@@ -8,13 +8,13 @@ from typing import NamedTuple
 TIMESTAMP = datetime.now().strftime("%Y%m%d%H%M%S")
 
 
-@component
+@component()
 def hello_world(text: str) -> str:
     print(text)
     return text
 
 
-@component
+@component()
 def two_outputs(
     text: str,
 ) -> NamedTuple(
@@ -30,7 +30,7 @@ def two_outputs(
     return (o1, o2)
 
 
-@component
+@component()
 def consumer(text1: str, text2: str, text3: str):
     print(f"text1: {text1}; text2: {text2}; text3: {text3}")
 

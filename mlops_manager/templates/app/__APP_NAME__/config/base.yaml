@@ -19,3 +19,10 @@ cloud:
   region: {{gcp_region}}
   # GCP Storage path to use as root for all runtime files
   storage_root: {{gcp_storage_root}}
+
+pipelines:
+  hello-world: # ID must match: "^[a-z0-9][a-z0-9-]{0,127}$"
+    python_path: {{app_name}}.pipelines.hello_pipeline.hello_pipeline
+    parameters: # optional
+      text: "custom message"
+    type_check: True # optional

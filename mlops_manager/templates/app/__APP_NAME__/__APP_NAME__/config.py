@@ -1,6 +1,5 @@
 import yaml
-import sys
-from typing import Any, List
+from typing import Any, List, Dict
 
 _CONFIG = None
 
@@ -19,14 +18,17 @@ def get_config():
 
 class Config(object):
     # TODO(axelmagn): docstring
-    def __init__(self, config_file_paths: List[str] = []):
+    def __init__(self,
+                 config_init: Dict[str, Any] = {},
+                 config_file_paths: List[str] = []):
         """Config constructor.
 
         Args:
+            config_init:        Initial configuration dictionary.
             config_file_paths:  Paths to configuration files to be loaded in 
                                 order.
         """
-        self._config = {}
+        self._config = config_init
         for path in config_file_paths:
             self.load_config(path)
 
