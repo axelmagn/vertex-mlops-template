@@ -1,15 +1,18 @@
 import setuptools
-import datetime
+import os
 
 PACKAGE_NAME = "{{app_name}}"
 # TODO(axelmagn): unify with requirements.txt
 REQUIRED_PACKAGES = [
-    "kfp~=1.6.2",
-    "PyYAML~=5.4.1",
-    "tensorflow~=2.5.0",
+    "kfp",
+    "PyYAML",
+    "tensorflow"
+    # "kfp~=1.6.2",
+    # "PyYAML~=5.4.1",
+    # "tensorflow~=2.5.0",
     # "numpy~=1.20.3",
 ]
-VERSION = "0.0.1"  # TODO(axelmagn): determine dynamically
+VERSION = os.environ.get("PYTHON_PACKAGE_VERSION", "0.0.1")
 
 
 def setup():

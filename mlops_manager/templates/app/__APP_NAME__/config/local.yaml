@@ -1,2 +1,6 @@
+# Default configuration for local invocations.
+# Should not be used in production.
+
+# Release version
 release:
   version: local
