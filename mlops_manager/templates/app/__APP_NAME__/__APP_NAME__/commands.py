@@ -1,7 +1,7 @@
 from . import pipelines
 from .cli import command, arg
 from .config import get_config
-from .pipelines.runner import PipelineRunner
+from .pipelines.harness import PipelineHarness
 from kfp.v2 import compiler
 from kfp.v2.google.client import AIPlatformClient
 import importlib.util
@@ -18,6 +18,10 @@ def example(args):
     config = get_config()
     project_id = config['cloud']['project_id']
     print(f"You said '{args.echo}'")
+
+
+def dump_config():
+    config = get_config()
 
 
 @command([
@@ -47,7 +51,7 @@ def build_pipeline(args):
                       + "is not a directory.")
     os.makedirs(output_dir, exist_ok=True)
 
-    pipeline_job_path = PipelineRunner().build_pipeline(
+    pipeline_job_path = PipelineHarness().build_pipeline(
         pipeline_id=pipeline_id,
         output_dir=output_dir,
     )
@@ -100,7 +104,7 @@ def run_pipeline(args):
         logging.fatal("Cannot derive job spec path."
                       + " Neither '--job-spec' nor '--out-manifest' is set.")
 
-    response = PipelineRunner().run_pipeline(
+    response = PipelineHarness().run_pipeline(
         pipeline_id,
         job_spec_path,
     )
@@ -118,35 +122,27 @@ def run_pipeline(args):
         logging.info(f"Wrote pipeline run manifest: {out_manifest_path}")
 
 
-@ command([
-    arg("pipeline_id", help="The pipeline to run", type=str),
+# TRAINER TASK COMMANDS
+
+@command([
+    arg("--width", type=int, default=128, help="width of hidden layers"),
+    arg("--depth", type=int, default=1, help="number of hidden layers"),
+    arg("--epochs", type=int, default=10, help="training epochs"),
+
 ])
-def run_pipeline_old(args):
-    config = get_config()
-    pipeline_func = getattr(pipelines, args.pipeline_id)
-    build_dir = os.path.join(args.build_dir, "pipelines", args.pipeline_id)
-    os.makedirs(build_dir, exist_ok=True)
-    pipeline_package_path = os.path.join(
-        build_dir, f"{args.pipeline_id}_pipeline_job.json")
+def train_fashion_mnist_dense(args):
+    """Example training command for the fashion_mnist dataset"""
+    from .trainers import fashion_mnist_dense
 
-    compiler.Compiler().compile(
-        pipeline_func=pipeline_func,
-        package_path=pipeline_package_path,
+    # load environment params
+    training_data_uri = os.environ.get('AIP_TRAINING_DATA_URI')
+    model_dir_uri = os.environ.get('AIP_MODEL_DIR')
+    tensorboard_log_dir_uri = os.environ.get('AIP_TENSORBOARD_LOG_DIR', None)
+    fashion_mnist_dense.train(
+        training_data_uri=training_data_uri,
+        model_dir_uri=model_dir_uri,
+        feedforward_width=args.width,
+        feedforward_depth=args.depth,
+        epochs=args.epochs,
+        tensorboard_log_dir_uri=tensorboard_log_dir_uri,
     )
-
-    api_client = AIPlatformClient(
-        project_id=config['cloud']['project_id'],
-        region=config['cloud']['region'],
-    )
-
-    pipeline_storage_root = os.path.join(
-        config['cloud']['storage_root'], 'pipelines', args.pipeline_id)
-    pipeline_run_response_path = os.path.join(
-        build_dir, f"{args.pipeline_id}_run_response.yaml")
-    response = api_client.create_run_from_job_spec(
-        job_spec_path=pipeline_package_path,
-        pipeline_root=pipeline_storage_root
-    )
-
-    with open(pipeline_run_response_path, 'w') as f:
-        f.write(yaml.safe_dump(response))

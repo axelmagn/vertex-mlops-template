@@ -76,3 +76,12 @@ factor app](https://12factor.net/) methodology, become brittle when required to
 be propagated to subtasks.  By consolidating configuration into yaml files, we
 can obviate the need to propagate environment variables.
 
+### Why use YAML configs rather than {gflags,protobuf,jsonnet,TOML,...}?
+
+There are many tools and languages that can be used to configure an application.
+YAML was chosen due to its already widespread use for configuration on google
+cloud platform.  When authoring the configuration module, we prioritized
+simplicity over scalability.  If these choices are unsuitable for your use case,
+we strongly encourage you to modify your app's configuration code to meet your
+needs.
+

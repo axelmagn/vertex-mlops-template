@@ -2,16 +2,11 @@ import setuptools
 import os
 
 PACKAGE_NAME = "{{app_name}}"
-# TODO(axelmagn): unify with requirements.txt
-REQUIRED_PACKAGES = [
-    "kfp",
-    "PyYAML",
-    "tensorflow"
-    # "kfp~=1.6.2",
-    # "PyYAML~=5.4.1",
-    # "tensorflow~=2.5.0",
-    # "numpy~=1.20.3",
-]
+# TODO(axelmagn): less brittle pathing
+REQUIRED_PACKAGES = []
+if os.path.exists('requirements.txt'):
+    with open('requirements.txt') as f:
+        REQUIRED_PACKAGES = f.read().strip().split('\n')
 VERSION = os.environ.get("PYTHON_PACKAGE_VERSION", "0.0.1")
 
 

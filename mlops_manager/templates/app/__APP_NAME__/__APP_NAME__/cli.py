@@ -11,7 +11,14 @@ PARSER.add_argument("--build-dir",
 PARSER.add_argument("-c", "--config-file",
                     help="configuration file to load.  May be repeated.",
                     action="append",
-                    dest="config_files")
+                    dest="config_files",
+                    default=[])
+PARSER.add_argument("--config-string",
+                    help="configuration string to load.  May be repeated. "
+                    + "Loaded after configuration files.",
+                    action="append",
+                    dest="config_strings",
+                    default=[])
 
 COMMANDS_PARSER = PARSER.add_subparsers(title="commands", dest="command")
 
@@ -29,7 +36,8 @@ def get_args():
 def command(args=[], parent=COMMANDS_PARSER):
     """Decorator to denote functions that act as CLI commands."""
     def decorator(func):
-        parser = parent.add_parser(func.__name__, description=func.__doc__)
+        name = func.__name__
+        parser = parent.add_parser(name, description=func.__doc__)
         for arg in args:
             parser.add_argument(*arg[0], **arg[1])
         parser.set_defaults(func=func)
