@@ -1,35 +1,60 @@
-steps:
-  # TODO(axelmagn): unit testing
-  - id: unit_tests
-    name: python
-    args: ["pytest"]
+options:
+  dynamic_substitutions: True
 
+substitutions:
+  _APP_NAME: '{{app_name}}'
+  _DEPLOYMENT_NAME: local
+  _PYTHON_PACKAGE_VERSION: '0.0.1'
+  _IMAGE_NAME: gcr.io/${PROJECT_ID}/${_APP_NAME}:${_DEPLOYMENT_NAME}
+
+# 1200s = 20m
+timeout: 1200s
+
+steps:
   - id: make_python_package
     name: python
     entrypoint: python
     args: ["setup.py", "sdist"]
+    env:
+      - "PYTHON_PACKAGE_VERSION=${_PYTHON_PACKAGE_VERSION}"
+
+  - id: pull_cached_image
+    name: gcr.io/cloud-builders/docker
+    entrypoint: bash
+    args: ['-c', 'docker pull ${_IMAGE_NAME} || exit 0']
 
   - id: make_docker_image
-    name: 'gcr.io/cloud-builders/docker'
-    args: ['build', '-t', "us-central1-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO_NAME}/${_APP_NAME}:${_DIST_VERSION}", '.']
+    name: gcr.io/cloud-builders/docker
+    args: [
+      'build', 
+      '-t', "${_IMAGE_NAME}", 
+      '--cache-from', '${_IMAGE_NAME}', 
+      '.'
+    ]
 
   - id: push_docker_image
-    name: 'gcr.io/cloud-builders/docker'
-    args: ['push', "us-central1-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO_NAME}/${_APP_NAME}:${_DIST_VERSION}"]
+    name: gcr.io/cloud-builders/docker
+    args: ['push', '${_IMAGE_NAME}']
+
+  - id: build_pipeline
+    name: ${_IMAGE_NAME}
+    entrypoint: 'python'
+    args: [
+      '-m', '${_APP_NAME}',
+      '-c', 'config/base.yaml',
+      '-c', 'config/${_DEPLOYMENT_NAME}.yaml',
+      'build_pipeline', 'hello_world',
+      '--out-manifest', './build_manifest.yaml',
+    ]
 
   - id: run_pipeline
-    name: 'us-central1-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO_NAME}/${_APP_NAME}:${_DIST_VERSION}'
+    name: ${_IMAGE_NAME}
     entrypoint: 'python'
-    args: ['-m', '${_APP_NAME}', '--config-file', 'config/base.yaml', 'run_pipeline', '${_PIPELINE_NAME}']
-
-timeout: 1200s
-
-artifacts:
-  objects:
-    # TODO(axelmagn): dynamic bucket
-    location: gs://${_BUCKET_NAME}/${_APP_NAME}/build/${BUILD_ID}
-    paths:
-      # TODO(axelmagn): dynamic versioning 
-      - dist/${_APP_NAME}-${_DIST_VERSION}.tar.gz
-images:
-  - us-central1-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO_NAME}/${_APP_NAME}:${_DIST_VERSION}
+    args: [
+      '-m', '${_APP_NAME}',
+      '-c', 'config/base.yaml',
+      '-c', 'config/${_DEPLOYMENT_NAME}.yaml',
+      'run_pipeline', 'hello_world',
+      '--build-manifest', './build_manifest.yaml',
+      '--out-manifest', './run_manifest.yaml',
+    ]

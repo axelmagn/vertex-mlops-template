@@ -9,20 +9,35 @@ app_name: {{app_name}}
 # 
 # TODO(axelmagn): implement secret handling in config.py
 # TODO(axelmagn): articulate secret definition format
-secrets:
+secrets: {}
 
-# Google Cloud Configurations
+# Cloud configuration variables
+# TODO(axelmagn): convert to deployment config
 cloud:
+  name: local
   # GCP Project ID
-  project_id: {{gcp_project_id}}
+  project: {{gcp_project_id}}
   # GCP Region used for all regionalized tasks and artifacts.
   region: {{gcp_region}}
   # GCP Storage path to use as root for all runtime files
   storage_root: {{gcp_storage_root}}
 
+
+# local paths
+local:
+  # local directory to use as root of build artifacts
+  build_root: "./build"
+
 pipelines:
-  hello-world: # ID must match: "^[a-z0-9][a-z0-9-]{0,127}$"
-    python_path: {{app_name}}.pipelines.hello_pipeline.hello_pipeline
-    parameters: # optional
-      text: "custom message"
-    type_check: True # optional
+  hello_world:
+    build:
+      python_path: {{app_name}}.pipelines.hello_pipeline.hello_pipeline # required
+      compile_args:
+        # the following args are automatically overwritten: 
+        # pipeline_func, package_path, pipeline_name
+        pipeline_parameters: # optional
+          text: "custom message"
+        type_check: True # optional
+    run:
+      run_args:
+
