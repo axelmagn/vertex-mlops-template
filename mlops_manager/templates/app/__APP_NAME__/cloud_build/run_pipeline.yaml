@@ -4,20 +4,12 @@ options:
 substitutions:
   _APP_NAME: '{{app_name}}'
   _DEPLOYMENT_NAME: local
-  _PYTHON_PACKAGE_VERSION: '0.0.1'
   _IMAGE_NAME: gcr.io/${PROJECT_ID}/${_APP_NAME}:${_DEPLOYMENT_NAME}
 
 # 1200s = 20m
 timeout: 1200s
 
 steps:
-  - id: make_python_package
-    name: python
-    entrypoint: python
-    args: ["setup.py", "sdist"]
-    env:
-      - "PYTHON_PACKAGE_VERSION=${_PYTHON_PACKAGE_VERSION}"
-
   - id: pull_cached_image
     name: gcr.io/cloud-builders/docker
     entrypoint: bash
@@ -43,7 +35,7 @@ steps:
       '-m', '${_APP_NAME}',
       '-c', 'config/base.yaml',
       '-c', 'config/${_DEPLOYMENT_NAME}.yaml',
-      'build_pipeline', 'hello_world',
+      'build_pipeline', 'fashion_mnist',
       '--out-manifest', './build_manifest.yaml',
     ]
 
@@ -54,7 +46,7 @@ steps:
       '-m', '${_APP_NAME}',
       '-c', 'config/base.yaml',
       '-c', 'config/${_DEPLOYMENT_NAME}.yaml',
-      'run_pipeline', 'hello_world',
+      'run_pipeline', 'fashion_mnist',
       '--build-manifest', './build_manifest.yaml',
       '--out-manifest', './run_manifest.yaml',
     ]

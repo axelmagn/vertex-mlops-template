@@ -16,7 +16,9 @@ CONFIG_BUILD_SUBSECTION = 'build'
 CONFIG_RUN_SUBSECTION = 'run'
 
 
-class PipelineRunner(object):
+class PipelineHarness(object):
+    """Build and run pipelines."""
+
     def __init__(
         self,
         config: Optional[Config] = None,
@@ -138,9 +140,10 @@ class PipelineRunner(object):
         # pipeline config
         pconfig = (self.config
                    [CONFIG_PIPELINES_SECTION]
-                   [pipeline_id]
-                   [CONFIG_RUN_SUBSECTION])
-        if pconfig is None:  # protects against nonetype in config
+                   [pipeline_id])
+        # run section may be left unset if only default params are needed.
+        pconfig = pconfig.get(CONFIG_RUN_SUBSECTION, None)
+        if pconfig is None:  # protects against unset or nonetype in config
             pconfig = {}
 
         # computed parameters
@@ -159,6 +162,9 @@ class PipelineRunner(object):
         labels['release_version'] = self.config['release']['version']
         labels['app_name'] = self.config['app_name']
         labels['pipeline_id'] = pipeline_id
+        # Please include this line to allow GCP calculate usage that is derived
+        # from the Vertex MLOPs Template.
+        labels['vertex_mlops_template'] = "yes"  # TODO: replace with version
         run_args['labels'] = labels
 
         run_response = self.client.create_run_from_job_spec(**run_args)

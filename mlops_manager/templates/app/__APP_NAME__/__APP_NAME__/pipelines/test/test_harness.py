@@ -1,9 +1,17 @@
+from ..harness import PipelineHarness
 from ...config import Config
+from kfp.v2.compiler import Compiler
+from unittest.mock import Mock
+import os
+import tempfile
 
 CONFIG = Config(config_init={
     "app_name": "app",
     "release": {
         "version": "vtest"
+    },
+    "cloud": {
+        "storage_root": "gs://dummy_bucket/"
     },
     "pipelines": {
         "hello_world": {
@@ -20,11 +28,6 @@ CONFIG = Config(config_init={
 # produces the expected file.
 # TODO(axelmagn): separate with pytest mark
 def test_compiler_builds_hello_pipeline():
-    from .. import runner as pipeline_runner
-    import os
-    import tempfile
-    from unittest.mock import Mock
-    from kfp.v2.compiler import Compiler
 
     # use real compiler.  side effects are isolated to temp dir.
     compiler = Compiler()
@@ -32,10 +35,10 @@ def test_compiler_builds_hello_pipeline():
     # use temporary output dir to isolate side effects
     output_dir = tempfile.mkdtemp()
 
-    runner = pipeline_runner.PipelineRunner(
+    harness = PipelineHarness(
         config=CONFIG, client=client, compiler=compiler)
 
-    output_path = runner.build_pipeline(
+    output_path = harness.build_pipeline(
         pipeline_id="hello_world",
         output_dir=output_dir,
     )
@@ -46,10 +49,37 @@ def test_compiler_builds_hello_pipeline():
     assert os.path.samefile(output_dir, written_dir)
 
     # check that we wrote the expected filename
-    assert written_filename == "test-app-hello-world-test-job-spec.json"
+    assert written_filename == "app-hello-world-vtest-job-spec.json"
 
     # check that the written file exists
     assert os.path.isfile(output_path)
 
     # check that the written file is nonempty
     assert os.path.getsize(output_path) > 0
+
+
+def test_run_pipeline():
+    compiler = Mock()
+    client = Mock()
+    client_response = "MOCK_RESPONSE"
+    client.create_run_from_job_spec.return_value = client_response
+    harness = PipelineHarness(config=CONFIG, client=client, compiler=compiler)
+    run_response = harness.run_pipeline(
+        pipeline_id="hello_world",
+        job_spec_path="job_spec_path.json",
+    )
+
+    # check that client call behaves as expected
+    client.create_run_from_job_spec.assert_called_with(
+        job_spec_path="job_spec_path.json",
+        pipeline_root="gs://dummy_bucket/pipelines",
+        labels={
+            "release_version": "vtest",
+            "app_name": "app",
+            "pipeline_id": "hello_world",
+            "_framework": "VERTEX_MLOPS_TEMPLATE"
+        },
+    )
+
+    # check that run_pipeline returns the client's response
+    assert run_response == client_response

@@ -41,3 +41,9 @@ pipelines:
     run:
       run_args:
 
+  fashion_mnist:
+    build:
+      python_path: {{app_name}}.pipelines.fashion_mnist.pipeline
+    run:
+      run_args: 
+

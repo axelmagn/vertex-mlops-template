@@ -1,16 +1,15 @@
 # TODO(axelmagn): replace with more flexible solution
-ARG cpu_gpu="cpu"
+ARG CPU_GPU="cpu"
 
 # TODO(axelmagn): use templating to determine CPU/GPU
-FROM gcr.io/deeplearning-platform-release/tf2-${cpu_gpu}.2-5
+FROM gcr.io/deeplearning-platform-release/tf2-${CPU_GPU}.2-5:m73
 
-ARG python_package_name="{{app_name}}"
-ARG python_package_version="0.0.1"
-ARG python_sdist_path="dist/${python_package_name}-${python_package_version}.tar.gz"
-ARG python_sdist_local="${python_package_name}-${python_package_version}.tar.gz"
+COPY requirements.txt /tmp/
+RUN pip install -r /tmp/requirements.txt
 
-COPY ${python_sdist_path} ${python_sdist_local}
-RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir ${python_sdist_local}
+COPY . /app/
+WORKDIR /app
 
-ENTRYPOINT [ "python", "-m", "${python_package_name}" ]
+ARG PYTHON_PACKAGE_NAME={{app_name}}
+RUN python setup.py install
+ENTRYPOINT [ "python", "-m", "${PYTHON_PACKAGE_NAME}" ]

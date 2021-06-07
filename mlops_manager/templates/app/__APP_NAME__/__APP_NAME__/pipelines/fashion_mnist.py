@@ -1,18 +1,11 @@
 # TODO(axelmagn): delete in favor of standalone pipeline template
+from ..config import get_config
 from kfp import dsl
-
-from kfp.v2.dsl import (
-    Dataset,
-    Input,
-    Metrics,
-    Model,
-    Output,
-    component,
-)
+from kfp.v2.dsl import (Dataset, Input, Metrics, Model, Output, component)
 
 
 # TODO(axelmagn): use built app image
-@component(base_image="gcr.io/deeplearning-platform-release/tf2-cpu.2-5")
+@component(base_image=get_config()['release']['images']['default'])
 def example_gen(
     train_dataset_raw: Output[Dataset],
     test_dataset_raw: Output[Dataset],
@@ -44,7 +37,7 @@ def example_gen(
 # TODO(axelmagn): use built app image
 
 
-@component(base_image="gcr.io/deeplearning-platform-release/tf2-cpu.2-5")
+@component(base_image=get_config()['release']['images']['default'])
 def preprocess(
     raw_dataset: Input[Dataset],
     clean_dataset: Output[Dataset],
@@ -64,59 +57,79 @@ def preprocess(
 
 
 # TODO(axelmagn): use built app image
-@component(base_image="gcr.io/deeplearning-platform-release/tf2-cpu.2-5")
+@component(base_image=get_config()['release']['images']['default'])
 def train(
+    config_str: str,
     train_dataset_clean: Input[Dataset],
     trained_model: Output[Model],
-    metrics: Output[Metrics],
 ):
-    # TODO(axelmagn): invoke vertex custom training
-    from tensorflow import keras
-    import numpy as np
+    from {{app_name}}.config import init_global_config
 
-    with open(train_dataset_clean.path, 'rb') as f:
-        npzfile = np.load(f)
-        train_images = npzfile['images']
-        train_labels = npzfile['labels']
+    from google.cloud import aiplatform as aip
+    import logging
+    import yaml
 
-    # Define the model using Keras.
-    model = keras.Sequential([
-        keras.layers.Flatten(input_shape=(28, 28)),
-        keras.layers.Dense(128, activation='relu'),
-        keras.layers.Dense(10)
-    ])
+    # load config and extract used values
+    config = init_global_config(config_strings=[config_str])
+    app_name = config['app_name']
+    project = config['cloud']['project']
+    region = config['cloud']['region']
+    service_account = config['cloud'].get('service_account', None)
+    tensorboard_id = config['cloud'].get('tensorboard_id', None)
+    # TODO: build other images
+    train_image_uri = config['release']['images']['default']
+    predict_image_uri = config['release']['images']['predict']
 
-    model.compile(optimizer='adam',
-                  loss=keras.losses.SparseCategoricalCrossentropy(
-                      from_logits=True),
-                  metrics=['accuracy'])
+    staging_bucket = f"{app_name}-{region}-staging"
+    aip.init(project=project, location=region, staging_bucket=staging_bucket)
 
-    # Run a training job with specified number of epochs
-    train_history = model.fit(train_images, train_labels, epochs=10)
-    for history_key in train_history.history:
-        history_value = train_history.history[history_key]
-        if isinstance(history_value, int) or isinstance(history_value, float):
-            metrics.log_metric(f"train_{history_key}", float(history_value))
+    dataset_uri = train_dataset_clean.uri
+    output_uri = trained_model.uri
 
-    model.save(trained_model.path)
+    logging.info(f"dataset_uri: {dataset_uri}")
+    logging.info(f"output_uri: {output_uri}")
+
+    train_job = aip.CustomContainerTrainingJob(
+        display_name="train-fashion-mnist",
+        container_uri=train_image_uri,
+        command=[
+            "python",
+            "-m", app_name,
+            "--config-string", config_str,
+            "train_fashion_mnist_dense",
+        ],
+        staging_bucket=staging_bucket,
+        model_serving_container_image_uri=predict_image_uri
+    )
+
+    trained_model = train_job.run(
+        replica_count=1,
+        base_output_dir=output_uri,
+        environment_variables={
+            "AIP_TRAINING_DATA_URI": dataset_uri,
+        },
+        sync=True,
+        service_account=service_account,
+        tensorboard=tensorboard_id
+    )
 
 
-# TODO(axelmagn): use built app image
-@component(base_image="gcr.io/deeplearning-platform-release/tf2-cpu.2-5")
+@ component(base_image=get_config()['release']['images']['default'])
 def evaluate(
     test_dataset_clean: Input[Dataset],
     trained_model: Input[Model],
     metrics: Output[Metrics],
 ):
-    import numpy as np
     from tensorflow import keras
+    import numpy as np
+    import os
 
     with open(test_dataset_clean.path, 'rb') as f:
         npzfile = np.load(f)
         test_images = npzfile['images']
         test_labels = npzfile['labels']
 
-    model = keras.models.load_model(trained_model.path)
+    model = keras.models.load_model(os.path.join(trained_model.path, 'model'))
 
     test_loss, test_acc = model.evaluate(test_images, test_labels, verbose=2)
 
@@ -124,11 +137,10 @@ def evaluate(
     metrics.log_metric("test_acc", test_acc)
 
 
-@dsl.pipeline(
-    name="fashion-mnist-train",
-    description="Train a simple classifier for fashion-mnist problem",
-)
-def fashion_mnist_pipeline():
+@ dsl.pipeline()
+def pipeline():
+    config = get_config()
+
     eg_task = example_gen()
     train_dataset_raw = eg_task.outputs['train_dataset_raw']
     test_dataset_raw = eg_task.outputs['test_dataset_raw']
@@ -139,7 +151,10 @@ def fashion_mnist_pipeline():
     test_preprocess_task = preprocess(test_dataset_raw)
     test_dataset_clean = test_preprocess_task.outputs['clean_dataset']
 
-    train_task = train(train_dataset_clean)
+    train_task = train(
+        config_str=config.dumps(),
+        train_dataset_clean=train_dataset_clean,
+    )
     trained_model = train_task.outputs['trained_model']
 
     eval_task = evaluate(test_dataset_clean, trained_model)
