@@ -5,20 +5,20 @@
 release:
   version: local
   images: 
-    default: gcr.io/{{gcp_project_id}}/{{app_name}}:local
-    cpu: gcr.io/{{gcp_project_id}}/{{app_name}}:local-cpu
-    gpu: gcr.io/{{gcp_project_id}}/{{app_name}}:local-gpu
+    default: gcr.io/{{gcp_project}}/{{app_name}}:local
+    cpu: gcr.io/{{gcp_project}}/{{app_name}}:local-cpu
+    gpu: gcr.io/{{gcp_project}}/{{app_name}}:local-gpu
     predict: us-docker.pkg.dev/vertex-ai/prediction/tf2-cpu.2-5:latest
 
 cloud:
   # GCP Project ID
-  project: {{gcp_project_id}}
+  project: {{gcp_project}}
   # GCP Region used for all regionalized tasks and artifacts.
   region: {{gcp_region}}
   # GCP Storage path to use as root for all runtime files
   storage_root: {{gcp_storage_root}}
   # service account. Required for tensorboard, optional otherwise.
-  service_account: 
+  service_account:
   # tensorboard resource name (optional)
   # format: projects/{project}/locations/{location}/tensorboards/{tensorboard}
   # this may be obtained from `gcloud beta ai tensorboards list`
