@@ -1,5 +1,5 @@
 # TODO(axelmagn): delete in favor of standalone pipeline template
-from ..config import get_config
+from ...config import get_config
 from kfp import dsl
 from kfp.v2.dsl import (Dataset, Input, Metrics, Model, Output, component)
 

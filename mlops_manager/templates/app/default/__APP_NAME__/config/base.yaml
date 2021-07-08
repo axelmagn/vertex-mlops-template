@@ -28,22 +28,4 @@ local:
   # local directory to use as root of build artifacts
   build_root: "./build"
 
-pipelines:
-  hello_world:
-    build:
-      python_path: {{app_name}}.pipelines.hello_pipeline.hello_pipeline # required
-      compile_args:
-        # the following args are automatically overwritten: 
-        # pipeline_func, package_path, pipeline_name
-        pipeline_parameters: # optional
-          text: "custom message"
-        type_check: True # optional
-    run:
-      run_args:
-
-  fashion_mnist:
-    build:
-      python_path: {{app_name}}.pipelines.train_fashion_mnist.pipeline
-    run:
-      run_args: 
 

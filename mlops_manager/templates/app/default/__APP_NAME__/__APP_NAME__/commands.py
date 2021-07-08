@@ -124,6 +124,7 @@ def run_pipeline(args):
 
 # TRAINER TASK COMMANDS
 
+# TODO: replace with harness
 @command([
     arg("--width", type=int, default=128, help="width of hidden layers"),
     arg("--depth", type=int, default=1, help="number of hidden layers"),
@@ -132,13 +133,13 @@ def run_pipeline(args):
 ])
 def train_fashion_mnist_dense(args):
     """Example training command for the fashion_mnist dataset"""
-    from .trainers import dense_fashion_mnist
+    from .trainers.fashion_mnist.task import train
 
     # load environment params
     training_data_uri = os.environ.get('AIP_TRAINING_DATA_URI')
     model_dir_uri = os.environ.get('AIP_MODEL_DIR')
     tensorboard_log_dir_uri = os.environ.get('AIP_TENSORBOARD_LOG_DIR', None)
-    dense_fashion_mnist.train(
+    train(
         training_data_uri=training_data_uri,
         model_dir_uri=model_dir_uri,
         feedforward_width=args.width,

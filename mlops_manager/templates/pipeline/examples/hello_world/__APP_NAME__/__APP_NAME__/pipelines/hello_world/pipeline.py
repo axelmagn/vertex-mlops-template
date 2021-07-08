@@ -39,7 +39,7 @@ def consumer(text1: str, text2: str, text3: str):
     name="hello-pipeline",
     description="A simple intro pipeline",
 )
-def hello_pipeline(text: str = "hi there"):
+def pipeline(text: str = "hi there"):
     hw_task = hello_world(text)
     two_outputs_task = two_outputs(text)
     _consumer_task = consumer(

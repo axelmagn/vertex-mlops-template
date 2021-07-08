@@ -8,3 +8,7 @@ args:
 filename_substitutions:
   __APP_NAME__: app
   __PIPELINE_NAME__: name
+
+template_context:
+  app_name: app
+  pipeline_name: name

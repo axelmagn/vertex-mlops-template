@@ -35,6 +35,7 @@ steps:
       '-m', '${_APP_NAME}',
       '-c', 'config/base.yaml',
       '-c', 'config/${_DEPLOYMENT_NAME}.yaml',
+      '-c', 'config/fashion_mnist.yaml',
       'build_pipeline', 'fashion_mnist',
       '--out-manifest', './build_manifest.yaml',
     ]
@@ -46,6 +47,7 @@ steps:
       '-m', '${_APP_NAME}',
       '-c', 'config/base.yaml',
       '-c', 'config/${_DEPLOYMENT_NAME}.yaml',
+      '-c', 'config/fashion_mnist.yaml',
       'run_pipeline', 'fashion_mnist',
       '--build-manifest', './build_manifest.yaml',
       '--out-manifest', './run_manifest.yaml',
