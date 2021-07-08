@@ -16,7 +16,7 @@ secrets: {}
 cloud:
   name: local
   # GCP Project ID
-  project: {{gcp_project_id}}
+  project: {{gcp_project}}
   # GCP Region used for all regionalized tasks and artifacts.
   region: {{gcp_region}}
   # GCP Storage path to use as root for all runtime files
@@ -43,7 +43,7 @@ pipelines:
 
   fashion_mnist:
     build:
-      python_path: {{app_name}}.pipelines.fashion_mnist.pipeline
+      python_path: {{app_name}}.pipelines.train_fashion_mnist.pipeline
     run:
       run_args: 
 

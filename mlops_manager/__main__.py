@@ -5,7 +5,7 @@ from . import cli, commands
 
 def main():
     # parse arguments
-    args = cli._PARSER.parse_args()
+    args, unknown = cli._PARSER.parse_known_args()
 
     # configure logging
     log_level_num = getattr(logging, args.log_level.upper(), None)
@@ -14,8 +14,11 @@ def main():
     # handle command
     if args.command is None:
         cli._PARSER.print_help()
-    else:
+    elif args.func.strict:
+        args = cli._PARSER.parse_args()
         args.func(args)
+    else:
+        args.func(args, unknown)
 
 
 if __name__ == "__main__":
