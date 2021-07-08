@@ -1,0 +1,12 @@
+pipelines:
+  hello_world:
+    build:
+      python_path: {{app_name}}.pipelines.hello_world.pipeline.pipeline # required
+      compile_args:
+        # the following args are automatically overwritten: 
+        # pipeline_func, package_path, pipeline_name
+        pipeline_parameters: # optional
+          text: "custom message"
+        type_check: True # optional
+    run:
+      run_args:

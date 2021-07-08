@@ -1,0 +1,4 @@
+pipelines:
+  {{pipeline_name}}:
+    build:
+      python_path: {{app_name}}.pipelines.{{pipeline_name}}.pipeline.pipeline
