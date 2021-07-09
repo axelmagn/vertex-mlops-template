@@ -1,9 +1,9 @@
 # Default configuration for local invocations.
 # Should not be used in production.
 
-# Release version
+# Release details
 release:
-  version: local
+  label: local
   images: 
     default: gcr.io/{{gcp_project}}/{{app_name}}:local
     cpu: gcr.io/{{gcp_project}}/{{app_name}}:local-cpu

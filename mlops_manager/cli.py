@@ -68,7 +68,9 @@ def template_command(args=[], parent=_COMMANDS_PARSER, strict=True):
                             "--example",
                             help="example to included",
                             action='append',
-                            choices=examples)
+                            choices=examples,
+                            dest='examples',
+                            default=[])
 
                     template_parser.add_argument(
                         "--variant",

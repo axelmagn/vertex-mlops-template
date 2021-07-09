@@ -95,8 +95,7 @@ def start_template(args):
     )
     template_job.run()
 
-    examples = getattr(args, 'example', [])
-    for example in examples:
+    for example in args.examples:
         example_root = os.path.join(template_root, 'examples', example)
         example_job = TemplateTreeJob(
             template_root=example_root,

@@ -1,49 +1,32 @@
-from . import pipelines
+from argparse import REMAINDER
+from tensorflow.io import gfile
+import logging
+import os
+import sys
+import yaml
+
 from .cli import command, arg
 from .config import get_config
 from .pipelines.harness import PipelineHarness
-from kfp.v2 import compiler
-from kfp.v2.google.client import AIPlatformClient
-import importlib.util
-import logging
-import os
-import yaml
-
-
-@command([
-    arg("echo", help="String to echo", type=str),
-])
-def example(args):
-    # TODO(axelmagn): docstring
-    config = get_config()
-    project_id = config['cloud']['project_id']
-    print(f"You said '{args.echo}'")
-
-
-def dump_config():
-    config = get_config()
+from .util import dynamic_import_func, get_collection
 
 
 @command([
     arg("pipeline",
-        help=("Pipeline ID corresponding to key in pipelines "
-              + "section of config file."),
+        help=("pipeline ID from config"),
         type=str),
-    arg("-o", "--out-dir",
-        help="output directory (default: local.build_root from config)",
-        type=str, default=None),
-    arg("--out-manifest",
-        help="output manifest destination.  No manifest written if absent.",
-        type=str, default=None),
+    arg("-o", "--out-dir", type=str, default=None,
+        help="output directory (default: local.build_root from config)"),
 ])
 def build_pipeline(args):
+    """Build a pipeline job spec using configured settings."""
     pipeline_id = args.pipeline
 
     # load configured variables
     config = get_config()
     output_dir = args.out_dir
     if output_dir is None:
-        output_dir = config['local']['build_root']
+        output_dir = config['build']['local_root']
 
     # prepare output directory
     if os.path.exists(output_dir) and not os.path.isdir(output_dir):
@@ -57,30 +40,61 @@ def build_pipeline(args):
     )
     logging.info(f"Wrote compiled pipeline: {pipeline_job_path}")
 
-    # TODO(axelmagn): replace with manifests module
-    out_manifest_path = args.out_manifest
-    if out_manifest_path:
-        manifest = {
-            pipeline_id: {
-                "job_spec": pipeline_job_path
-            },
-        }
-        with open(out_manifest_path, 'w') as f:
-            yaml.safe_dump(manifest, f)
-        logging.info(f"Wrote pipeline build manifest: {out_manifest_path}")
+    manifest = {
+        pipeline_id: {
+            "job_spec": pipeline_job_path
+        },
+    }
+
+    return manifest
 
 
 @command([
-    arg("pipeline",
-        help=("Pipeline ID corresponding to key in pipelines "
-              + "section of config file."),
-        type=str),
-    arg("--build-manifest", help="build manifest file containing job spec path",
-        type=str, default=None),
-    arg("--job-spec", help="job spec file path", type=str, default=None),
-    arg("--out-manifest", help="output manifest destination", default=None),
+    arg("-o", "--out-dir", type=str, default=None,
+        help="output directory (default: local.build_root from config)"),
+])
+def build_pipelines(args):
+    """Build all pipeline job specs using configured settings."""
+    # load configured variables
+    config = get_config()
+    output_dir = args.out_dir
+    if output_dir is None:
+        output_dir = config['build']['local_root']
+
+    # prepare output directory
+    if os.path.exists(output_dir) and not os.path.isdir(output_dir):
+        logging.fatal("path supplied for output is not a directory")
+    os.makedirs(output_dir, exist_ok=True)
+
+    manifest = {}
+    for pipeline_id in get_collection(config, 'pipelines'):
+        logging.info("building pipeline: %s", pipeline_id)
+        pipeline_job_path = PipelineHarness().build_pipeline(
+            pipeline_id=pipeline_id,
+            output_dir=output_dir,
+        )
+        manifest[pipeline_id] = {"job_spec": pipeline_job_path}
+
+    return manifest
+
+
+@command()
+def deploy_pipelines(args):
+    """Deploy all configured pipelines"""
+    return PipelineHarness().deploy()
+
+
+@command([
+    arg("pipeline", type=str,
+        help="pipeline ID from config"),
+    arg("--manifest", type=str, default=None,
+        help="pipeline build manifest file containing job spec path"),
+    arg("--job-spec",  type=str, default=None, help="job spec file path"),
+    arg("--out-manifest", type=str, default=None,
+        help="output manifest destination"),
 ])
 def run_pipeline(args):
+    """Run a pipeline from either a job spec or a pipeline build manifest."""
     pipeline_id = args.pipeline
 
     # load configured variables
@@ -102,48 +116,71 @@ def run_pipeline(args):
         job_spec_path = manifest[pipeline_id]['job_spec']
     else:
         logging.fatal("Cannot derive job spec path."
-                      + " Neither '--job-spec' nor '--out-manifest' is set.")
+                      + " Neither '--job-spec' nor '--manifest' is set.")
 
     response = PipelineHarness().run_pipeline(
         pipeline_id,
         job_spec_path,
     )
-
-    # TODO(axelmagn): replace with manifests module
-    out_manifest_path = args.out_manifest
-    if out_manifest_path:
-        manifest = {
-            pipeline_id: {
-                "run_response": response
-            }
+    manifest = {
+        pipeline_id: {
+            "run_response": response
         }
-        with open(out_manifest_path, 'w') as f:
-            yaml.safe_dump(manifest, f)
-        logging.info(f"Wrote pipeline run manifest: {out_manifest_path}")
+    }
+    return manifest
 
 
-# TRAINER TASK COMMANDS
-
-# TODO: replace with harness
 @command([
-    arg("--width", type=int, default=128, help="width of hidden layers"),
-    arg("--depth", type=int, default=1, help="number of hidden layers"),
-    arg("--epochs", type=int, default=10, help="training epochs"),
-
+    arg("import_path", type=str,
+        help="python import string specifying task function to run"),
+    arg("task_args", nargs=REMAINDER, help="task arguments"),
 ])
-def train_fashion_mnist_dense(args):
-    """Example training command for the fashion_mnist dataset"""
-    from .trainers.fashion_mnist.task import train
+def task(args):
+    """Run a task function."""
+    func = dynamic_import_func(args.import_path)
+    task_args = func.parser.parse_args(args.task_args)
+    func(task_args)
 
-    # load environment params
-    training_data_uri = os.environ.get('AIP_TRAINING_DATA_URI')
-    model_dir_uri = os.environ.get('AIP_MODEL_DIR')
-    tensorboard_log_dir_uri = os.environ.get('AIP_TENSORBOARD_LOG_DIR', None)
-    train(
-        training_data_uri=training_data_uri,
-        model_dir_uri=model_dir_uri,
-        feedforward_width=args.width,
-        feedforward_depth=args.depth,
-        epochs=args.epochs,
-        tensorboard_log_dir_uri=tensorboard_log_dir_uri,
-    )
+
+@command()
+def dump_config(_args):
+    """Dump the current config to stdout or file"""
+    config = get_config()
+    return config.dumps()
+
+
+@command([
+    arg("--label", type=str, default=None, help="release label"),
+    arg("--build", type=str, default=None, help="build label"),
+    arg("--image", type=str, default=[], action="append", dest="images",
+        help="release image key/value pair of the form KEY=IMAGE_VALUE (repeatable)"),
+    arg("--pipelines-manifest", type=str, default=None,
+        help="path to pipeline manifest generated by `build_pipelines` invocation"),
+])
+def release_config(args):
+    """Build a release configuration section additively."""
+
+    config = get_config()
+
+    images = {}
+    for image in args.images:
+        key, value = image.split('=', 1)
+        images[key] = value
+
+    release = get_collection(config, 'release')
+
+    if args.label is not None:
+        release["label"] = args.label
+    if args.build is not None:
+        release["build"] = args.build
+    release["images"] = get_collection(release, "images")
+    release["images"].update(images)
+    if args.pipelines_manifest is not None:
+        with gfile.GFile(args.pipelines_manifest) as f:
+            release["pipelines"] = get_collection(release, "pipelines")
+            manifest = yaml.safe_load(f)
+            release["pipelines"].update(manifest)
+
+    config.set('release', release)
+
+    return config.dumps()

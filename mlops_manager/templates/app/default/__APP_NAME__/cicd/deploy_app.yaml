@@ -1,0 +1,16 @@
+substitutions:
+  _APP_NAME: "{{app_name}}"
+  _BUILD_LABEL: "${SHORT_SHA:-HEAD}"
+  _RELEASE_LABEL: "${BRANCH_NAME:-local}"
+  _IMAGE_TGT_BASE: "gcr.io/${PROJECT_ID}/${_APP_NAME}"
+  _RELEASE_IMAGE_TGT: "${_IMAGE_TGT_BASE}:release-${_RELEASE_LABEL}-${_BUILD_LABEL}"
+
+options:
+  dynamic_substitutions: True
+  substitution_option: 'ALLOW_LOOSE'
+
+steps:
+  - name: ${_RELEASE_IMAGE_TGT}
+    id: deploy pipelines
+    dir: '/app'
+    args: ["deploy_pipelines"]

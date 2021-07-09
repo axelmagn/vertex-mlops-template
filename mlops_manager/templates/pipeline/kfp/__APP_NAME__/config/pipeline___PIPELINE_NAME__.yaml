@@ -1,0 +1,9 @@
+pipelines:
+  {{pipeline_name}}:
+    build:
+      path: {{app_name}}.pipelines.{{pipeline_name}}.pipeline.pipeline
+      kwargs:
+    run:
+      kwargs:
+    schedule:
+      kwargs:
