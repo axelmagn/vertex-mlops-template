@@ -1,12 +1,17 @@
-import logging
+"""{{app_name}} process entry point."""
 
-from . import commands  # even if unused, this loads commands into parser
-from . import cli, config
+import logging
+import sys
+import yaml
+from yaml.error import YAMLError
+
+from . import cli, config, commands as _
 
 
 def main():
+    """Run the module as a command line tool."""
     # parse arguments
-    args, unknown = cli.PARSER.parse_known_args()
+    args = cli.PARSER.parse_args()
 
     # configure logging
     log_level_num = getattr(logging, args.log_level.upper(), None)
@@ -25,7 +30,24 @@ def main():
     )
     # invoke command. Although args could be retrieved with cli.get_args, we
     # pass it explicitly as a convenience.
-    args.func(args)
+    out = args.func(args)
+
+    # write the result to stdout or file
+    out_str = None
+    if isinstance(out, str):
+        out_str = out + "\n"
+    else:
+        try:
+            out_str = yaml.safe_dump(out)
+        except YAMLError:
+            logging.info("Command return value is not serializable as YAML.")
+    if out_str is not None:
+        if args.out_file is not None:
+            with open(args.out_file, 'w') as f:
+                f.write(out_str)
+            logging.info("Wrote command result to: %s" % args.out_file)
+        else:
+            sys.stdout.write(out_str)
 
 
 if __name__ == "__main__":

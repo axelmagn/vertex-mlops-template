@@ -8,7 +8,7 @@ import tempfile
 CONFIG = Config(config_init={
     "app_name": "app",
     "release": {
-        "version": "vtest"
+        "label": "test"
     },
     "cloud": {
         "storage_root": "gs://dummy_bucket/"
@@ -16,7 +16,7 @@ CONFIG = Config(config_init={
     "pipelines": {
         "hello_world": {
             "build": {
-                "python_path": "{{app_name}}.pipelines.hello_pipeline.hello_pipeline",
+                "path": "{{app_name}}.pipelines.test.hello_pipeline.pipeline",
             },
             "run": {},
         },
@@ -49,7 +49,7 @@ def test_compiler_builds_hello_pipeline():
     assert os.path.samefile(output_dir, written_dir)
 
     # check that we wrote the expected filename
-    assert written_filename == "app-hello-world-vtest-job-spec.json"
+    assert written_filename == "hello-world.json"
 
     # check that the written file exists
     assert os.path.isfile(output_path)
@@ -74,10 +74,10 @@ def test_run_pipeline():
         job_spec_path="job_spec_path.json",
         pipeline_root="gs://dummy_bucket/pipelines",
         labels={
-            "release_version": "vtest",
+            "release": "test",
             "app_name": "app",
             "pipeline_id": "hello_world",
-            "_framework": "VERTEX_MLOPS_TEMPLATE"
+            "vertex_mlops_template": "yes",
         },
     )
 

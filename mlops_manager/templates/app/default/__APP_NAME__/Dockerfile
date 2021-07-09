@@ -1,8 +1,8 @@
-# TODO(axelmagn): replace with more flexible solution
-ARG CPU_GPU="cpu"
-
-# TODO(axelmagn): use templating to determine CPU/GPU
-FROM gcr.io/deeplearning-platform-release/tf2-${CPU_GPU}.2-5:m73
+# Container is based on TFE images by default:
+# https://cloud.google.com/deep-learning-containers/docs/choosing-container
+# ACCELERATOR may take values of either `cpu` or `gpu`.
+ARG ACCELERATOR="cpu"
+FROM gcr.io/deeplearning-platform-release/tf2-${ACCELERATOR}.2-5:m73
 
 COPY requirements.txt /tmp/
 RUN pip install -r /tmp/requirements.txt
@@ -10,6 +10,6 @@ RUN pip install -r /tmp/requirements.txt
 COPY . /app/
 WORKDIR /app
 
-ARG PYTHON_PACKAGE_NAME={{app_name}}
-RUN python setup.py install
-ENTRYPOINT [ "python", "-m", "${PYTHON_PACKAGE_NAME}" ]
+RUN pip install .
+
+ENTRYPOINT [ "python", "-m", "{{app_name}}"]

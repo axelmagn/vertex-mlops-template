@@ -1,6 +1,4 @@
 #!/bin/bash
-#
-# Utility script to invoke the app CLI with its local configuration.
 set -exuo pipefail
 
 readonly PROJECT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )/.." &> /dev/null && pwd )"
@@ -16,9 +14,11 @@ then
     fi
 fi
 
-pushd "${PROJECT_DIR}" > /dev/null
-"${PYTHON_CMD}" -m {{app_name}} \
-    -c "config/base.yaml" \
-    -c "config/local.yaml" \
-    "${@}"
-popd > /dev/null
+case "${SKIP_LINT:-0}" in
+    1|true)
+        exit 0
+        ;;
+    *)
+        python -m pylint "${PROJECT_DIR}/{{app_name}}" "${@}"
+        ;;
+esac

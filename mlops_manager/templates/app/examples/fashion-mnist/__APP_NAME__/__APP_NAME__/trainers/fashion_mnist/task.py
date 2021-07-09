@@ -5,28 +5,33 @@ NOTE: this is a monolithic script for the purpose of prototyping.
 TODO: break down into modular components
 """
 
-import tensorflow as tf
-import numpy as np
+from ...cli import task, arg
 import logging
-from google.cloud import storage
-import tempfile
+import numpy as np
+import os
+import tensorflow as tf
 
 
-def train(
-        training_data_uri,
-        model_dir_uri,
-        tensorboard_log_dir_uri=None,
-        feedforward_width=128,
-        feedforward_depth=1,
-        input_shape=(28, 28),
-        optimizer='adam',
-        epochs=10,
-):
-    """
-    Train a densely connected neural network for fashion_mnist problem.
+@task([
+    arg('--width', type=int, default=128, help="feedforward width"),
+    arg('--depth', type=int, default=1, help="feedforward depth"),
+    arg('--input-shape', type=str, default="28,28",
+        help="input shape as comma separated integers"),
+    arg('--optimizer', type=str, default="adam", help="training optimizer"),
+    arg('--epochs', type=int, default=10, help="training epochs"),
+])
+def train(args):
+    """Train a densely connected neural network for fashion_mnist problem."""
 
-    TODO: parameters docstring
-    """
+    training_data_uri = os.environ.get('AIP_TRAINING_DATA_URI')
+    model_dir_uri = os.environ.get('AIP_MODEL_DIR')
+    tensorboard_log_dir_uri = os.environ.get('AIP_TENSORBOARD_LOG_DIR', None)
+    feedforward_width = args.width
+    feedforward_depth = args.depth
+    input_shape = [int(x) for x in args.input_shape.split(',')]
+    optimizer = args.optimizer
+    epochs = args.epochs
+
     logging.info("Training dense network")
     logging.info(f"training_data_uri: {training_data_uri}")
     logging.info(f"model_dir_uri: {model_dir_uri}")

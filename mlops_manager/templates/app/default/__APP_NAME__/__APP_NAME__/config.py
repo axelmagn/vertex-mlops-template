@@ -61,5 +61,11 @@ class Config(object):
         _config = yaml.safe_load(stream)
         self._config.update(_config)
 
+    def get(self, key, default=None):
+        return self._config.get(key, default)
+
+    def set(self, key, value):
+        self._config[key] = value
+
     def __getitem__(self, key):
         return self._config[key]

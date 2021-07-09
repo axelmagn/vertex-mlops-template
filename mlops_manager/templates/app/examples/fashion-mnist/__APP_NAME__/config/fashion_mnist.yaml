@@ -1,4 +1,4 @@
 pipelines:
   fashion_mnist:
     build:
-      python_path: {{app_name}}.pipelines.fashion_mnist.pipeline.pipeline
+      path: {{app_name}}.pipelines.fashion_mnist.pipeline.pipeline

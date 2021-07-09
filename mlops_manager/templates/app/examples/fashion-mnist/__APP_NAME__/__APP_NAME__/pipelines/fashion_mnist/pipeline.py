@@ -96,7 +96,8 @@ def train(
             "python",
             "-m", app_name,
             "--config-string", config_str,
-            "train_fashion_mnist_dense",
+            "task",
+            "{{app_name}}.trainers.fashion_mnist.task.train",
         ],
         staging_bucket=staging_bucket,
         model_serving_container_image_uri=predict_image_uri
@@ -114,7 +115,7 @@ def train(
     )
 
 
-@ component(base_image=get_config()['release']['images']['default'])
+@component(base_image=get_config()['release']['images']['default'])
 def evaluate(
     test_dataset_clean: Input[Dataset],
     trained_model: Input[Model],

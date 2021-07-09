@@ -2,6 +2,7 @@
 # the app.
 app_name: {{app_name}}
 
+# SECRETS CURRENTLY UNIMPLEMENTED
 # Secrets can be stored in environment variables, or Cloud Secret Manager.
 # Configuration manager will check first for environment variables, 
 # then for secrets in secret manager. Secret manager is only checked if the 
@@ -9,12 +10,11 @@ app_name: {{app_name}}
 # 
 # TODO(axelmagn): implement secret handling in config.py
 # TODO(axelmagn): articulate secret definition format
-secrets: {}
+# secrets: {}
 
 # Cloud configuration variables
 # TODO(axelmagn): convert to deployment config
 cloud:
-  name: local
   # GCP Project ID
   project: {{gcp_project}}
   # GCP Region used for all regionalized tasks and artifacts.
@@ -23,9 +23,24 @@ cloud:
   storage_root: {{gcp_storage_root}}
 
 
-# local paths
-local:
+# build configuration steps
+build:
   # local directory to use as root of build artifacts
-  build_root: "./build"
+  local_root: "build"
+
+deploy:
+  pipelines:
+    # known issue: deploying scheduled pipelines via cloud build currently 
+    # fails, as SDK attempts to re-enable APIs, and cloud build SA does not 
+    # have the requisite permissions.
+    # TODO(axelmagn): identify necessary role (short term)
+    # TODO(axelmagn): implement workaround (long term)
+    # starter: 2 * * * *
+    starter: once
+
+pipelines:
+  starter:
+    build:
+      path: {{app_name}}.pipelines.starter.pipeline.pipeline
 
 

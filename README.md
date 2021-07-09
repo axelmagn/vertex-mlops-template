@@ -53,6 +53,15 @@ gcloud builds submit \
 ```
 
 
+## Cloud Storage Directory Structure
+
+- build: record of artifacts produced by Cloud Build jobs
+    - {build_id}/*: directory containing manifest and artifacts from a build
+- release: configurations for current releases
+    - {release_id}.manifest: tag of the current image used by a release
+
+## Releases
+
 ## Q&A
 
 ### How is code in this project organized?
@@ -85,3 +94,8 @@ simplicity over scalability.  If these choices are unsuitable for your use case,
 we strongly encourage you to modify your app's configuration code to meet your
 needs.
 
+### Why not publish this as a PyPi package?
+
+This project is intended to be customized to fit your needs.  We therefore
+recommend forking this repository, so that you can start to develop the
+customizations and templates that fit your workflow.

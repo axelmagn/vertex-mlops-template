@@ -1,6 +1,10 @@
+from datetime import datetime
 from kfp import dsl
 from kfp.v2.dsl import component
 from typing import NamedTuple
+
+
+TIMESTAMP = datetime.now().strftime("%Y%m%d%H%M%S")
 
 
 @component()
