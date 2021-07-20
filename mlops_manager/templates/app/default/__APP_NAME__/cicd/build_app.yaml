@@ -18,7 +18,9 @@ substitutions:
   # build output image, including tag
   _BUILD_IMAGE_TGT: "${_IMAGE_TGT_BASE}:build-${_BUILD_LABEL}"
   # set to 1 to skip linting
-  _SKIP_LINT: "0"
+  # TODO(axelmagn): re-enable linting once you have cleared all TODOs
+  # _SKIP_LINT: "0"
+  _SKIP_LINT: "1"
   # set to 1 to skip testing
   _SKIP_TEST: "0"
 

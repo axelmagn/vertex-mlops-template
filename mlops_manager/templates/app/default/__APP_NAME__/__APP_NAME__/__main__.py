@@ -43,9 +43,9 @@ def main():
             logging.info("Command return value is not serializable as YAML.")
     if out_str is not None:
         if args.out_file is not None:
-            with open(args.out_file, 'w') as f:
-                f.write(out_str)
-            logging.info("Wrote command result to: %s" % args.out_file)
+            with open(args.out_file, 'w') as out_file:
+                out_file.write(out_str)
+            logging.info("Wrote command result to: %s", args.out_file)
         else:
             sys.stdout.write(out_str)
 

@@ -1,8 +1,16 @@
-from argparse import REMAINDER
-from tensorflow.io import gfile
+"""
+Application CLI Commands.
+
+This file defines command functions which are invokable as commands from the
+command line.  Additional application-specific commands are encouraged, and may
+be added with the {{app_name}}.cli.command decorator.
+"""
+
 import logging
 import os
-import sys
+
+from argparse import REMAINDER
+from tensorflow.io import gfile
 import yaml
 
 from .cli import command, arg
@@ -30,15 +38,15 @@ def build_pipeline(args):
 
     # prepare output directory
     if os.path.exists(output_dir) and not os.path.isdir(output_dir):
-        logging.fatal("Path supplied for output directory already exists and "
-                      + "is not a directory.")
+        logging.fatal(
+            "Path supplied for output directory already exists and is not a directory.")
     os.makedirs(output_dir, exist_ok=True)
 
     pipeline_job_path = PipelineHarness().build_pipeline(
         pipeline_id=pipeline_id,
         output_dir=output_dir,
     )
-    logging.info(f"Wrote compiled pipeline: {pipeline_job_path}")
+    logging.info("Wrote compiled pipeline: %s", pipeline_job_path)
 
     manifest = {
         pipeline_id: {
@@ -79,7 +87,7 @@ def build_pipelines(args):
 
 
 @command()
-def deploy_pipelines(args):
+def deploy_pipelines(args):  # pylint: disable=unused-argument
     """Deploy all configured pipelines"""
     return PipelineHarness().deploy()
 
@@ -97,26 +105,26 @@ def run_pipeline(args):
     """Run a pipeline from either a job spec or a pipeline build manifest."""
     pipeline_id = args.pipeline
 
-    # load configured variables
-    config = get_config()
-
     # derive job_spec_path from args
     if args.job_spec:
         job_spec_path = args.job_spec
     elif args.build_manifest:
         # TODO(axelmagn): replace with manifests module
-        with open(args.build_manifest, 'r') as f:
-            manifest = yaml.safe_load(f)
+        with open(args.build_manifest, 'r') as file:
+            manifest = yaml.safe_load(file)
         if pipeline_id not in manifest:
-            logging.fatal(f"manifest does not contain '{pipeline_id}'")
+            logging.fatal("manifest does not contain '%s'", pipeline_id)
         elif 'job_spec' not in manifest[pipeline_id]:
-            logging.fatal(f"manifest section for '{pipeline_id}' does not "
-                          + f"contain 'job_spec'")
+            logging.fatal(
+                "manifest section for '%s' does not contain 'job_spec'",
+                pipeline_id
+            )
 
         job_spec_path = manifest[pipeline_id]['job_spec']
     else:
-        logging.fatal("Cannot derive job spec path."
-                      + " Neither '--job-spec' nor '--manifest' is set.")
+        logging.fatal(
+            "Cannot derive job spec path. Neither '--job-spec' nor '--manifest' is set."
+        )
 
     response = PipelineHarness().run_pipeline(
         pipeline_id,
@@ -176,9 +184,9 @@ def release_config(args):
     release["images"] = get_collection(release, "images")
     release["images"].update(images)
     if args.pipelines_manifest is not None:
-        with gfile.GFile(args.pipelines_manifest) as f:
+        with gfile.GFile(args.pipelines_manifest) as file:
             release["pipelines"] = get_collection(release, "pipelines")
-            manifest = yaml.safe_load(f)
+            manifest = yaml.safe_load(file)
             release["pipelines"].update(manifest)
 
     config.set('release', release)

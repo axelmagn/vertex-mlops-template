@@ -1,9 +1,13 @@
-from ..harness import PipelineHarness
-from ...config import Config
-from kfp.v2.compiler import Compiler
+"""Tests for {{app_name}}.pipelines.harness."""
+
 from unittest.mock import Mock
 import os
 import tempfile
+
+from kfp.v2.compiler import Compiler
+
+from ..harness import PipelineHarness
+from ...config import Config
 
 CONFIG = Config(config_init={
     "app_name": "app",
@@ -24,10 +28,8 @@ CONFIG = Config(config_init={
 })
 
 
-# more of an integration test than a unit test.  Makes sure that build_pipeline
-# produces the expected file.
-# TODO(axelmagn): separate with pytest mark
 def test_compiler_builds_hello_pipeline():
+    """Test that the compiler builds the test pipeline."""
 
     # use real compiler.  side effects are isolated to temp dir.
     compiler = Compiler()
@@ -59,6 +61,7 @@ def test_compiler_builds_hello_pipeline():
 
 
 def test_run_pipeline():
+    """Test that PipelineHarness.run_pipeline submits pipelines correctly."""
     compiler = Mock()
     client = Mock()
     client_response = "MOCK_RESPONSE"
