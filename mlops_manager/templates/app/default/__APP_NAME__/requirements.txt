@@ -4,3 +4,4 @@ kfp
 google-cloud-aiplatform==1.1.1
 pytest
 pylint
+tensorflow

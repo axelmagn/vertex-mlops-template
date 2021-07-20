@@ -1,4 +1,10 @@
+"""
+Functions and decorators supporting the {{app_name}} command line interface.
+"""
+
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
+
+_ARGS = None
 
 PARSER = ArgumentParser()
 PARSER.add_argument("--log-level", type=str,
@@ -26,39 +32,47 @@ COMMANDS_PARSER = PARSER.add_subparsers(title="commands", dest="command")
 
 
 def init_global_args(args):
-    global _ARGS
+    """Initialize global arguments"""
+    global _ARGS  # pylint: disable=global-statement
     _ARGS = args
 
 
 def get_args():
-    global _ARGS
+    """Retrieve global arguments"""
+    global _ARGS  # pylint: disable=global-statement
     return _ARGS
 
 
-def command(args=[], parent=COMMANDS_PARSER, arg_parents=[PARSER]):
-    """Decorator to denote functions that act as CLI commands."""
+def command(args=[], parent=COMMANDS_PARSER):
+    # pylint: disable=dangerous-default-value
+    """
+    Decorator for functions that act as CLI commands.
+
+    Functions using this decorator will be added to a global parser that is used
+    when invoking the module via __main__.
+    """
     def decorator(func):
         parser = parent.add_parser(
             func.__name__,
             description=func.__doc__,
             formatter_class=ArgumentDefaultsHelpFormatter,
-            # parents=arg_parents,
         )
-        for arg in args:
-            parser.add_argument(*arg[0], **arg[1])
+        for _arg in args:
+            parser.add_argument(*_arg[0], **_arg[1])
         parser.set_defaults(func=func)
         return func
     return decorator
 
 
 def task(args=[]):
+    # pylint: disable=dangerous-default-value
     """
-    Tasks are standalone functions that have a corresponding argument parser.  
+    Tasks are standalone functions that have a corresponding argument parser.
 
-    Unlike commands, tasks are not integrated into the application's 
-    command parsing tree. they are intended to be invoked programatically.  
-    This is especially useful for training functions, where multiple 
-    `train(...)` functions would inevitably lead to naming collisions, but each 
+    Unlike commands, tasks are not integrated into the application's
+    command parsing tree. they are intended to be invoked programatically.
+    This is especially useful for training functions, where multiple
+    `train(...)` functions would inevitably lead to naming collisions, but each
     defines its own set of hyperparameters.
 
     A task function's parser may be accessed via its `parser` attribute.
@@ -69,8 +83,8 @@ def task(args=[]):
             description=func.__doc__,
             formatter_class=ArgumentDefaultsHelpFormatter,
         )
-        for arg in args:
-            parser.add_argument(*arg[0], **arg[1])
+        for _arg in args:
+            parser.add_argument(*_arg[0], **_arg[1])
         func.parser = parser
         return func
 

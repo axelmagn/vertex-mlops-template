@@ -1,6 +1,21 @@
 # Vertex MLOps Template
 
-## Quickstart
+## Getting Started
+
+### First-Time Setup
+
+### Create an App
+
+### Create a Pipeline
+
+### Update Configurations
+
+
+### Submit Pipeline
+
+### Automate with Cloud Build
+
+## Quickstart (old)
 
 **Note:** This procedure requires enabling a number of GCP services, and setting
 up some IAM and service account permissions.  These steps are not yet described

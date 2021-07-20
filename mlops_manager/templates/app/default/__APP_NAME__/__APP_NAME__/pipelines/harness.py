@@ -1,20 +1,43 @@
-from ..config import Config, get_config
-from ..constants import *
-from ..util import dynamic_import_func, get_collection
-from kfp.v2.compiler import Compiler
-from kfp.v2.google.client.client import AIPlatformClient
+"""Module for the Pipeline Harness"""
+
 from typing import Optional, Any, Dict
-import importlib
 import os
 import re
+
+from kfp.v2.compiler import Compiler
+from kfp.v2.google.client.client import AIPlatformClient
+
+from ..config import Config, get_config
+from ..util import dynamic_import_func, get_collection
+
+from ..constants import (
+    CONFIG_BUILD,
+    CONFIG_DEPLOY,
+    CONFIG_KWARGS,
+    CONFIG_LABELS,
+    CONFIG_PATH,
+    CONFIG_PIPELINES,
+    CONFIG_RELEASE,
+    CONFIG_RUN,
+    CONFIG_SCHEDULE,
+    CONFIG_RUN_ONCE,
+    CONFIG_JOB_SPEC,
+)
 
 
 # Pattern for valid names used as a uCAIP resource name.
 _VALID_NAME_PATTERN = re.compile('^[a-z][-a-z0-9]{0,127}$')
 
 
-class PipelineHarness(object):
-    """Build and run pipelines."""
+class PipelineHarness:
+    """
+    PipelineHarness performs lifecycle functions for pipelines which have been
+    configured programatically.
+
+    It's duties are to build, run, and schedule configured pipelines.  Where
+    necessary, it produces and consumes manifests which indicate the locations
+    job specs it has produced.
+    """
 
     def __init__(
         self,
@@ -41,37 +64,6 @@ class PipelineHarness(object):
             region
         )
 
-    def _get_pipeline_job_spec_filename(
-        self,
-        pipeline_name: str,
-    ):
-        """Get the correct filename for a pipeline job."""
-        # return f"{pipeline_name}-job-spec.json"
-        return f"{pipeline_name}.json"
-
-    def _get_pipeline_name(
-        self,
-        pipeline_id: str,
-    ):
-        """Get the canonical name for a pipeline from an app"""
-        # app_name = self.config['app_name']
-        # release_version = self.config['release']['label']
-        # name = f"{app_name}-{pipeline_id}-{release_version}"
-        return self._sanitize_name(pipeline_id)
-
-    def _sanitize_name(self, name: str):
-        """convert into a valid name for AI Platform"""
-        # python IDs will allow underscores but disallow hyphens, so some
-        # interpolation is necessary
-        return name.replace("_", "-")
-
-    def _validate_name(self, name: str):
-        """ensure name is valid on AI Platform"""
-        if not _VALID_NAME_PATTERN.match(name):
-            raise ValueError(
-                f"'{name}' must match '{_VALID_NAME_PATTERN.pattern}' to be"
-                + "valid on AI Platform.")
-
     def build_pipeline(
         self,
         pipeline_id: str,
@@ -97,8 +89,8 @@ class PipelineHarness(object):
         # load computed variables
         pipeline_func = dynamic_import_func(import_path)
         pipeline_name = self._get_pipeline_name(pipeline_id)
-        self._validate_name(pipeline_name)
-        output_filename = self._get_pipeline_job_spec_filename(pipeline_name)
+        _validate_name(pipeline_name)
+        output_filename = _get_pipeline_job_spec_filename(pipeline_name)
         output_path = os.path.join(output_dir, output_filename)
 
         # compute compiler arguments
@@ -113,11 +105,31 @@ class PipelineHarness(object):
 
         return output_path
 
+    def _get_pipeline_name(
+        self,
+        pipeline_id: str,
+    ):
+        """
+        Get the canonical name for a pipeline from an app.
+
+        Developers should feel empowered to adjust this to fit their naming
+        convention.
+        """
+        app_name = self.config['app_name']
+        release_version = self.config['release']['label']
+        name = f"{app_name}-{pipeline_id}-{release_version}"
+        return _sanitize_name(name)
+
     def run_pipeline(
         self,
         pipeline_id: str,
         job_spec_path: str,
     ) -> Dict[str, Any]:
+        """
+        Run a pipeline by ID according to its configuration.
+
+        Job spec is provided separately as a file path.
+        """
         # run section may be left unset if only default params are needed.
         pconfig = get_collection(
             self.config, [CONFIG_PIPELINES, pipeline_id, CONFIG_RUN])
@@ -140,8 +152,8 @@ class PipelineHarness(object):
         # derived from the Vertex MLOPs Template.
         labels['vertex_mlops_template'] = "yes"
         print("LABELS:")
-        print(get_collection(kwargs, 'labels'))
-        labels.update(get_collection(kwargs, 'labels'))
+        print(get_collection(kwargs, CONFIG_LABELS))
+        labels.update(get_collection(kwargs, CONFIG_LABELS))
         kwargs['labels'] = labels
 
         client = self._get_client()
@@ -154,6 +166,10 @@ class PipelineHarness(object):
         job_spec_path: str,
         schedule: Optional[str] = None
     ):
+        """
+        Submit a scheduled pipeline, which will be re-run periodically
+        according to its schedule string.
+        """
         # pipeline config
         pconfig = get_collection(
             self.config, [CONFIG_PIPELINES, pipeline_id, CONFIG_SCHEDULE])
@@ -177,6 +193,12 @@ class PipelineHarness(object):
         return response
 
     def deploy(self):
+        """
+        Deploy all pipelines specified in the deployment section of the config.
+
+        Pipelines may either be deployed to run once via the "once" string, or
+        on a set schedule with a schedule string.
+        """
         deploy_config = get_collection(
             self.config, [CONFIG_DEPLOY, CONFIG_PIPELINES])
         pipeline_manifest = get_collection(
@@ -190,3 +212,26 @@ class PipelineHarness(object):
             else:
                 results[pipeline_id] = self.schedule_pipeline(
                     pipeline_id, job_spec_path, schedule)
+
+
+def _get_pipeline_job_spec_filename(
+    pipeline_name: str,
+):
+    """Get the correct filename for a pipeline job."""
+    # return f"{pipeline_name}-job-spec.json"
+    return f"{pipeline_name}.json"
+
+
+def _validate_name(name: str):
+    """ensure name is valid on AI Platform"""
+    if not _VALID_NAME_PATTERN.match(name):
+        raise ValueError(
+            f"'{name}' must match '{_VALID_NAME_PATTERN.pattern}' to be"
+            + "valid on AI Platform.")
+
+
+def _sanitize_name(name: str):
+    """convert into a valid name for AI Platform Pipelines"""
+    # python IDs will allow underscores but disallow hyphens, so some
+    # interpolation is necessary
+    return name.replace("_", "-")

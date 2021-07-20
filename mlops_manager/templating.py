@@ -52,7 +52,8 @@ class TemplateTreeJob(object):
 
         loader = FileSystemLoader(self.template_root)
         env = Environment(loader=loader,
-                          autoescape=select_autoescape())
+                          autoescape=select_autoescape(),
+                          keep_trailing_newline=True)
 
         # apply templates in each directory
         for dir_name, _, file_list in os.walk(self.template_root):
