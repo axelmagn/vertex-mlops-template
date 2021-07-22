@@ -1,81 +1,102 @@
 # Vertex MLOps Template
 
+This project helps ML Engineers and Data Scientists accelerate the creation of
+AI Applications on the [Vertex AI](https://cloud.google.com/vertex-ai) platform.
+It is made available as a self-contained source repository, which users are
+encouraged to fork and customize to fit their own workflows.
+
 ## Getting Started
 
-### First-Time Setup
+When using the Vertex MLOps Template, code is organized into "apps".  Each app
+is packaged into its own container, which provides a self-contained environment
+for execution on Vertex services. To get started, this section will walk you
+through the creation and deployment of a simple app that performs
+classifications on the
+[fashion-mnist](https://www.tensorflow.org/datasets/catalog/fashion_mnist)
+dataset.
+
+### Prerequisites
+
+In order to complete this tutorial, you will need access to a Google Cloud
+Platform account and project, as well as a few basic resources within the
+project.
+
+Before starting, take a moment to set up and note the name of the following
+resources:
+
+- gcp-project: the GCP project to deploy the app within. 
+  ([docs](https://cloud.google.com/resource-manager/docs/creating-managing-projects))
+- gcp-region: the region to use for regionalized resources (when in doubt, use 
+  us-central1). ([docs](https://cloud.google.com/compute/docs/regions-zones))
+- gcp-storage-root: the Google Cloud Storage path to contain application
+  objects. The bucket region *must* be set to the same region as `gcp-region` 
+  for some Vertex functionality to work. 
+  ([docs](https://cloud.google.com/storage/docs/creating-buckets))
+
+It is recommended that you obtain the Editor or Owner IAM roles within
+your project.  While more granular IAM roles may be utilized, granular IAM
+permissions are beyond the scope of this quickstart.
+
+It will also be necessary to enable the following Cloud Services: 
+([docs](https://cloud.google.com/service-usage/docs/enable-disable))
+
+```
+gcloud services enable \
+    aiplatform.googleapis.com
+    appengine.googleapis.com
+    cloudbuild.googleapis.com
+    cloudfunctions.googleapis.com
+    cloudscheduler.googleapis.com
+```
 
 ### Create an App
 
+```
+./bin/manage.sh start app \
+    --name first_app \
+    --gcp-project {PROJECT_ID} \
+    --gcp-region {REGION} \
+    --gcp-storage-root gs://{BUCKET}/{PATH}
+```
+
 ### Create a Pipeline
+
+```
+./bin/manage.sh start pipeline \
+    --name first_pipeline \
+    --app first_app
+```
+
+Take a moment to read through the code that was generated in
+`./first_app/first_app/pipelines/first_pipeline/pipeline.py`.  It contains
+the boilerplate for a simple pipeline, heavily commented.
 
 ### Update Configurations
 
+```
+cd first_app
+cat config/pipeline_first_pipeline.yaml >> config/base.yaml
+```
 
 ### Submit Pipeline
 
+```
+bash bin/run.sh build_pipeline first_pipeline
+bash bin/run.sh run_pipeline first_pipeline
+```
+
 ### Automate with Cloud Build
 
-## Quickstart (old)
-
-**Note:** This procedure requires enabling a number of GCP services, and setting
-up some IAM and service account permissions.  These steps are not yet described
-here.  Until they are, expect a little bit of problem solving on your first
-runthrough.
-
-Install dev requirements
-
 ```
-pip install -r requirements.txt
+gcloud builds submit --config cicd/build_app.yaml
+gcloud builds submit --config cicd/release_app.yaml
+gcloud builds submit --config cicd/deploy_app.yaml
 ```
 
-Interact with MLOps Manager
+## Resources
 
-```
-./bin/manage.sh --help
-```
-
-Start an app
-
-```
-./bin/manage.sh start_app \
-    --name <app_name> \
-    --gcp_project <project_id> \
-    --gcp_region <region> \
-    --gcp_storage_root <gcs_path>
-```
-
-View the app source tree
-
-```
-tree <app_name>
-```
-
-Launch the example pipeline `hello_pipeline`.
-
-```
-.<app_name>/bin/run.sh run_pipeline hello_pipeline
-```
-
-Launch a build job.
-
-*TODO(axelmagn): wrap in runner command*
-
-```
-pushd simple_app
-gcloud builds submit \
-    --config config/build/cloudbuild.yaml . \
-    --substitutions='_ARTIFACT_REPO_NAME=<artifact_repo_name>,_DIST_VERSION=<version>,_APP_NAME=<app_name>,_BUCKET_NAME=<bucket_name>,_PIPELINE_NAME=hello_pipeline'
-```
-
-
-## Cloud Storage Directory Structure
-
-- build: record of artifacts produced by Cloud Build jobs
-    - {build_id}/*: directory containing manifest and artifacts from a build
-- release: configurations for current releases
-    - {release_id}.manifest: tag of the current image used by a release
-
-## Releases
+- [Best practices for implementing machine learning on Google Cloud](https://cloud.google.com/architecture/ml-on-gcp-best-practices)
+- [Practitioners Guide to MLOps: A framework for continuous delivery and automation of machine learning](https://cloud.google.com/resources/mlops-whitepaper)
 
 ## Q&A
 
