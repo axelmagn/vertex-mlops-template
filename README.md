@@ -112,11 +112,21 @@ cd first_app
 cat config/pipeline_first_pipeline.yaml >> config/base.yaml
 ```
 
+modify the `deploy` section of `config/base.yaml` to contain `first_pipeline`
+
+```
+deploy:
+  pipelines:
+    first_app: once
+    
+
+
+
 ### Submit Pipeline
 
 ```
-bash bin/run.sh build_pipeline first_pipeline
-bash bin/run.sh run_pipeline first_pipeline
+bash bin/run-local.sh build_pipeline first_pipeline
+bash bin/run-local.sh run_pipeline first_pipeline
 ```
 
 ### Automate with Cloud Build

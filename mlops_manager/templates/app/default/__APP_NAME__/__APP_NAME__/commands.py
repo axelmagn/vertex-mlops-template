@@ -8,6 +8,7 @@ be added with the {{app_name}}.cli.command decorator.
 
 import logging
 import os
+import sys
 
 from argparse import REMAINDER
 from tensorflow.io import gfile
@@ -40,6 +41,7 @@ def build_pipeline(args):
     if os.path.exists(output_dir) and not os.path.isdir(output_dir):
         logging.fatal(
             "Path supplied for output directory already exists and is not a directory.")
+        sys.exit("exiting")
     os.makedirs(output_dir, exist_ok=True)
 
     pipeline_job_path = PipelineHarness().build_pipeline(
@@ -72,6 +74,7 @@ def build_pipelines(args):
     # prepare output directory
     if os.path.exists(output_dir) and not os.path.isdir(output_dir):
         logging.fatal("path supplied for output is not a directory")
+        sys.exit("exiting")
     os.makedirs(output_dir, exist_ok=True)
 
     manifest = {}
@@ -108,23 +111,26 @@ def run_pipeline(args):
     # derive job_spec_path from args
     if args.job_spec:
         job_spec_path = args.job_spec
-    elif args.build_manifest:
+    elif args.manifest:
         # TODO(axelmagn): replace with manifests module
-        with open(args.build_manifest, 'r') as file:
+        with open(args.manifest, 'r') as file:
             manifest = yaml.safe_load(file)
         if pipeline_id not in manifest:
             logging.fatal("manifest does not contain '%s'", pipeline_id)
+            sys.exit("exiting")
         elif 'job_spec' not in manifest[pipeline_id]:
             logging.fatal(
                 "manifest section for '%s' does not contain 'job_spec'",
                 pipeline_id
             )
+            sys.exit("exiting")
 
         job_spec_path = manifest[pipeline_id]['job_spec']
     else:
         logging.fatal(
             "Cannot derive job spec path. Neither '--job-spec' nor '--manifest' is set."
         )
+        sys.exit("exiting")
 
     response = PipelineHarness().run_pipeline(
         pipeline_id,

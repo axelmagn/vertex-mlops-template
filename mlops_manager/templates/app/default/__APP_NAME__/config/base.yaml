@@ -26,5 +26,3 @@ deploy:
   # TODO(axelmagn): implement workaround (long term)
   # starter: 2 * * * *
   pipelines:
-
-pipelines:
