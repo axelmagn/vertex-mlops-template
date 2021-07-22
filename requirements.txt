@@ -1,0 +1,4 @@
+jinja2~=3.0.1
+kfp~=1.6.2
+autopep8~=1.5.7
+PyYAML~=5.4.1

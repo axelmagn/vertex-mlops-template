@@ -1,0 +1,4 @@
+pipelines:
+  fashion_mnist:
+    build:
+      path: {{app_name}}.pipelines.fashion_mnist.pipeline.pipeline

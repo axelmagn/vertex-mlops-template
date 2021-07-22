@@ -1,0 +1,19 @@
+# TODO: variables
+args:
+  name:
+    help: "Name of the app"
+  gcp_project:
+    help: "GCP project name"
+  gcp_region:
+    help: "GCP region for all app resources"
+  gcp_storage_root:
+    help: "GCP Storage bucket to use as app root.  The bucket's region should be same as app's GCP Region"
+
+filename_substitutions:
+  __APP_NAME__: name
+
+template_context:
+  app_name: name
+  gcp_project: gcp_project
+  gcp_region: gcp_region
+  gcp_storage_root: gcp_storage_root

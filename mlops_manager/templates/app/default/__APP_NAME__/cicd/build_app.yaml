@@ -1,0 +1,94 @@
+# Build the app.
+# 
+# This produces CPU and GPU versions of the release image, assuming that model
+# training and prediction may benefit from GPU acceleration.
+substitutions:
+  # name of the app
+  _APP_NAME: "{{app_name}}"
+  # label of the build, used for organizing output artifacts and images
+  _BUILD_LABEL: "${SHORT_SHA:-HEAD}"
+  # destination for build artifacts on GCS
+  _BUILD_ARTIFACTS_DEST: "{{gcp_storage_root}}/build/${_BUILD_LABEL}"
+  # docker builder image
+  _DOCKER_BUILD_IMAGE: gcr.io/cloud-builders/docker
+  # filename used for the unit test report
+  _TEST_REPORT_TGT: "${_APP_NAME}_${_TAG}_test_log.xml"
+  # base image name of this application
+  _IMAGE_TGT_BASE: "gcr.io/${PROJECT_ID}/${_APP_NAME}"
+  # build output image, including tag
+  _BUILD_IMAGE_TGT: "${_IMAGE_TGT_BASE}:build-${_BUILD_LABEL}"
+  # set to 1 to skip linting
+  # TODO(axelmagn): re-enable linting once you have cleared all TODOs
+  # _SKIP_LINT: "0"
+  _SKIP_LINT: "1"
+  # set to 1 to skip testing
+  _SKIP_TEST: "0"
+
+options:
+  dynamic_substitutions: True
+  substitution_option: 'ALLOW_LOOSE'
+
+artifacts:
+  objects:
+    location: "${_BUILD_ARTIFACTS_DEST}"
+    paths:
+      - ${_TEST_REPORT_TGT}
+
+images:
+  - ${_BUILD_IMAGE_TGT}
+  - ${_BUILD_IMAGE_TGT}-gpu
+
+steps:
+  # cache the latest image in order to speed up builds
+  - name: ${_DOCKER_BUILD_IMAGE}
+    id: docker cache
+    entrypoint: 'bash'
+    args: ['-c', 'docker pull ${_IMAGE_TGT_BASE}:latest || exit 0']
+
+  # Create build image (CPU version)
+  - name: ${_DOCKER_BUILD_IMAGE}
+    id: build cpu
+    entrypoint: docker
+    args: [
+      "build", 
+      "-t", "${_BUILD_IMAGE_TGT}", 
+      "--build-arg", "BASE_VARIANT=cpu", 
+      '--cache-from', '${_BUILD_IMAGE_TGT}:latest',
+      "."
+    ]
+    waitFor:
+      - docker cache
+
+  # Create build image (GPU version)
+  - name: ${_DOCKER_BUILD_IMAGE}
+    id: build gpu
+    entrypoint: docker
+    args: [
+      "build", 
+      "-t", "${_BUILD_IMAGE_TGT}-gpu", 
+      "--build-arg", "BASE_VARIANT=gpu", 
+      '--cache-from', '${_BUILD_IMAGE_TGT}:latest',
+      "."
+    ]
+    waitFor:
+      - docker cache
+
+  # Lint the CPU build image (results should not differ with GPU)
+  - name: ${_BUILD_IMAGE_TGT}
+    id: lint
+    entrypoint: bash
+    args: ["/app/bin/lint.sh"]
+    env:
+      "SKIP_LINT=${_SKIP_LINT}"
+    waitFor:
+      - build cpu
+
+  # Run unit tests on the CPU build image (results should not differ with GPU)
+  - name: ${_BUILD_IMAGE_TGT}
+    id: test
+    entrypoint: bash
+    args: ["/app/bin/test.sh", "--junitxml=${_TEST_REPORT_TGT}"]
+    env:
+      "SKIP_TEST=${_SKIP_TEST}"
+    waitFor:
+      - build cpu
