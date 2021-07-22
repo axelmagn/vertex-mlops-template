@@ -118,9 +118,7 @@ modify the `deploy` section of `config/base.yaml` to contain `first_pipeline`
 deploy:
   pipelines:
     first_app: once
-    
-
-
+```
 
 ### Submit Pipeline
 
