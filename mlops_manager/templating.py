@@ -66,6 +66,7 @@ class TemplateTreeJob(object):
             for file_name in file_list:
                 file_load_path = os.path.join(relative_dir, file_name)
                 file_write_path = os.path.join(target_dir, file_name)
+                file_write_path = self._substitute_name(file_write_path)
 
                 # handle files that already exist according to policy
                 if os.path.exists(file_write_path):

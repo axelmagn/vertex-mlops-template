@@ -71,6 +71,8 @@ pip install -r requirements.txt
     --gcp-project {PROJECT_ID} \
     --gcp-region {REGION} \
     --gcp-storage-root gs://{BUCKET}/{PATH}
+    
+tree first_app
 ```
 
 ### Create a Pipeline
@@ -79,11 +81,16 @@ pip install -r requirements.txt
 ./bin/manage.sh start pipeline \
     --name first_pipeline \
     --app first_app
+    
+tree first_app
 ```
 
 Take a moment to look through the code that was generated in
 `first_app.pipelines.first_pipeline.pipeline`.  It contains
 the boilerplate for a simple pipeline, heavily commented.
+
+Also notice that a new configuration file was created:
+`config/pipeline_first_pipeline.yaml`
 
 ### Create a Trainer
 
@@ -95,6 +102,9 @@ the boilerplate for a simple pipeline, heavily commented.
 
 Similarly, take a moment to take a look through the trainer generated in
 `first_app.trainers.first_trainer.task`.
+
+In your pipeline definition, configure the training component to use
+`first_app.trainers.first_trainer.task`. (Search for "PLACEHOLDER")
 ### Update Configurations
 
 ```
