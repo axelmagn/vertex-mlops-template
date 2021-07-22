@@ -58,7 +58,7 @@ class TemplateTreeJob(object):
         # apply templates in each directory
         for dir_name, _, file_list in os.walk(self.template_root):
 
-            relative_dir = dir_name[len(self.template_root):]
+            relative_dir = dir_name[len(self.template_root) + 1:]
             target_dir = self._substitute_name(relative_dir)
             target_dir = os.path.join(self.target_root, target_dir)
             self._ensure_dir(target_dir)

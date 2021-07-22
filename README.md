@@ -49,6 +49,20 @@ gcloud services enable \
     cloudscheduler.googleapis.com
 ```
 
+### Install Manager Dependencies
+
+```
+pip install --user -r requirements.txt
+```
+
+or
+
+```
+python -m virtualenv venv
+source venv/bin/activate
+pip install -r requirements.txt
+```
+
 ### Create an App
 
 ```
