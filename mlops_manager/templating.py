@@ -103,17 +103,7 @@ class TemplateTreeJob(object):
             logging.info(f"{directory} - EXISTS")
 
     def _substitute_name(self, path: str):
-        # guard against empty string
-        if not path:
-            return path
-
-        # recursively split up the path and perform substitution
-        def split_sub_all(path):
-            if not path or path == "/":
-                return tuple()
-            (head, tail) = os.path.split(path)
-            if tail in self.filename_substitutions:
-                tail = self.filename_substitutions[tail]
-            return split_sub_all(head) + (tail,)
-
-        return os.path.join(*split_sub_all(path))
+        for key in self.filename_substitutions:
+            value = self.filename_substitutions[key]
+            path = path.replace(key, value)
+        return path

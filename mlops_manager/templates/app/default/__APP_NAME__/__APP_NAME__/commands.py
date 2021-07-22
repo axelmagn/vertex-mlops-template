@@ -24,7 +24,7 @@ from .util import dynamic_import_func, get_collection
         help=("pipeline ID from config"),
         type=str),
     arg("-o", "--out-dir", type=str, default=None,
-        help="output directory (default: local.build_root from config)"),
+        help="output directory (default: build.local_root variable from config)"),
 ])
 def build_pipeline(args):
     """Build a pipeline job spec using configured settings."""

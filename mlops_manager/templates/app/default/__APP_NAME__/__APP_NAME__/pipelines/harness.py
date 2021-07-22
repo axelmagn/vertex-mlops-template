@@ -41,7 +41,6 @@ class PipelineHarness:
 
     def __init__(
         self,
-        # TODO(axelmagn): decouple from config
         config: Optional[Config] = None,
         client: Optional[AIPlatformClient] = None,
         compiler: Optional[Compiler] = None,
@@ -148,8 +147,8 @@ class PipelineHarness:
         labels['release'] = self.config['release']['label']
         labels['app_name'] = self.config['app_name']
         labels['pipeline_id'] = pipeline_id
-        # Please include the following line to allow GCP calculate usage that is
-        # derived from the Vertex MLOPs Template.
+        # Please include the following label to allow GCP to attribute usage
+        # that is derived from the Vertex MLOPs Template.
         labels['vertex_mlops_template'] = "yes"
         print("LABELS:")
         print(get_collection(kwargs, CONFIG_LABELS))
