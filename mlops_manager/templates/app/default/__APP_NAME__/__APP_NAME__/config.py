@@ -44,7 +44,7 @@ class Config:
         """
         config_init = config_init if config_init is not None else {}
         config_file_paths = config_file_paths if config_file_paths is not None else []
-        config_init = config_init if config_init is not None else []
+        config_strings = config_strings if config_strings is not None else []
 
         self._config = config_init
         self.config_file_paths = config_file_paths

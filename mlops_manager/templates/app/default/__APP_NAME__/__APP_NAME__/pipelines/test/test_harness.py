@@ -51,7 +51,7 @@ def test_compiler_builds_hello_pipeline():
     assert os.path.samefile(output_dir, written_dir)
 
     # check that we wrote the expected filename
-    assert written_filename == "hello-world.json"
+    assert written_filename == "app-hello-world-test.json"
 
     # check that the written file exists
     assert os.path.isfile(output_path)
