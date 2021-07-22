@@ -67,10 +67,20 @@ gcloud services enable \
     --app first_app
 ```
 
-Take a moment to read through the code that was generated in
-`./first_app/first_app/pipelines/first_pipeline/pipeline.py`.  It contains
+Take a moment to look through the code that was generated in
+`first_app.pipelines.first_pipeline.pipeline`.  It contains
 the boilerplate for a simple pipeline, heavily commented.
 
+### Create a Trainer
+
+```
+./bin/manage.sh start trainer \
+    --name first_trainer \
+    --app first_app
+```
+
+Similarly, take a moment to take a look through the trainer generated in
+`first_app.trainers.first_trainer.task`.
 ### Update Configurations
 
 ```

@@ -19,18 +19,12 @@ build:
   local_root: "build"
 
 deploy:
+  # known issue: deploying scheduled pipelines via cloud build currently 
+  # fails, as SDK attempts to re-enable APIs, and cloud build SA does not 
+  # have the requisite permissions.
+  # TODO(axelmagn): identify necessary role (short term)
+  # TODO(axelmagn): implement workaround (long term)
+  # starter: 2 * * * *
   pipelines:
-    # known issue: deploying scheduled pipelines via cloud build currently 
-    # fails, as SDK attempts to re-enable APIs, and cloud build SA does not 
-    # have the requisite permissions.
-    # TODO(axelmagn): identify necessary role (short term)
-    # TODO(axelmagn): implement workaround (long term)
-    # starter: 2 * * * *
-    starter: once
 
 pipelines:
-  starter:
-    build:
-      path: {{app_name}}.pipelines.starter.pipeline.pipeline
-
-
