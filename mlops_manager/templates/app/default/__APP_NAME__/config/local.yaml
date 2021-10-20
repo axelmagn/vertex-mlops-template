@@ -1,5 +1,35 @@
 # Default configuration for local invocations.
 # Should not be used in production.
+# the name of the app.  This becomes the root name of all artifacts related to 
+# the app.
+
+app_name: {{app_name}}
+
+# Cloud configuration variables
+# TODO(axelmagn): convert to deployment config
+cloud:
+  # GCP Project ID
+  project: {{gcp_project}}
+  # GCP Region used for all regionalized tasks and artifacts.
+  region: {{gcp_region}}
+  # GCP Storage path to use as root for all runtime files
+  storage_root: {{gcp_storage_root}}
+
+
+# build configuration steps
+build:
+  # local directory to use as root of build artifacts
+  local_root: "build"
+
+deploy:
+  # known issue: deploying scheduled pipelines via cloud build currently 
+  # fails, as SDK attempts to re-enable APIs, and cloud build SA does not 
+  # have the requisite permissions.
+  # TODO(axelmagn): identify necessary role (short term)
+  # TODO(axelmagn): implement workaround (long term)
+  # starter: 2 * * * *
+  pipelines:
+
 
 # Release details
 release:
@@ -9,17 +39,3 @@ release:
     cpu: gcr.io/{{gcp_project}}/{{app_name}}:local-cpu
     gpu: gcr.io/{{gcp_project}}/{{app_name}}:local-gpu
     predict: us-docker.pkg.dev/vertex-ai/prediction/tf2-cpu.2-5:latest
-
-cloud:
-  # GCP Project ID
-  project: {{gcp_project}}
-  # GCP Region used for all regionalized tasks and artifacts.
-  region: {{gcp_region}}
-  # GCP Storage path to use as root for all runtime files
-  storage_root: {{gcp_storage_root}}
-  # service account. Required for tensorboard, optional otherwise.
-  service_account:
-  # tensorboard resource name (optional)
-  # format: projects/{project}/locations/{location}/tensorboards/{tensorboard}
-  # this may be obtained from `gcloud beta ai tensorboards list`
-  tensorboard_id:

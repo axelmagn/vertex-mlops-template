@@ -25,8 +25,8 @@ def main():
     cli.init_global_args(args)
     # load config globally
     config.init_global_config(
-        config_file_paths=args.config_files,
-        config_strings=args.config_strings,
+        config_file_path=args.config_file,
+        config_string=args.config_string,
     )
     # invoke command. Although args could be retrieved with cli.get_args, we
     # pass it explicitly as a convenience.

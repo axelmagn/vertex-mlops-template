@@ -6,7 +6,7 @@ This module also manages a global configuration object, which may be initialized
 with 'init_global_config' and retrieved with 'get_config'.
 
 """
-from typing import Any, List, Dict, Optional
+from typing import Any, Dict, Optional
 
 import yaml
 
@@ -31,9 +31,8 @@ class Config:
 
     def __init__(self,
                  config_init: Optional[Dict[str, Any]] = None,
-                 config_file_paths: Optional[List[str]] = None,
-                 config_strings: Optional[List[str]] = None,
-                 ):
+                 config_file_path: Optional[str] = None,
+                 config_string: Optional[str] = None,):
         """Config constructor.
 
         Args:
@@ -42,19 +41,15 @@ class Config:
                                 order.
             config_strings:     yaml strings containing dictionaries to add.
         """
-        config_init = config_init if config_init is not None else {}
-        config_file_paths = config_file_paths if config_file_paths is not None else []
-        config_strings = config_strings if config_strings is not None else []
+        self._config = {}
+        if config_init is not None:
+            self._config = config_init
+        elif config_string is not None:
+            self.loads(config_string)
+        elif config_file_path is not None:
+            self.load_config_file(config_file_path)
 
-        self._config = config_init
-        self.config_file_paths = config_file_paths
-        for path in config_file_paths:
-            self.load_config(path)
-
-        for config_str in config_strings:
-            self.loads(config_str)
-
-    def load_config(self, config_path: str):
+    def load_config_file(self, config_path: str):
         """Load a config file.
 
         Conflicting top-level keys in the existing config are overwritten with
@@ -64,8 +59,7 @@ class Config:
             config_path: path of the config file to load.
         """
         with open(config_path, 'r') as file:
-            _config = yaml.safe_load(file)
-        self._config.update(_config)
+            self._config = yaml.safe_load(file)
 
     def dumps(self, stream=None):
         """Dump config to string or stream"""
@@ -73,8 +67,7 @@ class Config:
 
     def loads(self, stream):
         """Update config additively with supplied string or stream"""
-        _config = yaml.safe_load(stream)
-        self._config.update(_config)
+        self._config = yaml.safe_load(stream)
 
     def get(self, key, default=None):
         """Retrieve a config value by key"""

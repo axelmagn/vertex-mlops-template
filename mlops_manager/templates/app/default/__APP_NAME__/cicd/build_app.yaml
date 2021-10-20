@@ -33,6 +33,8 @@ artifacts:
     location: "${_BUILD_ARTIFACTS_DEST}"
     paths:
       - ${_TEST_REPORT_TGT}
+      
+timeout: 2400s # 40m
 
 images:
   - ${_BUILD_IMAGE_TGT}

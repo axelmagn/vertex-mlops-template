@@ -18,7 +18,6 @@ fi
 
 pushd "${PROJECT_DIR}" > /dev/null
 "${PYTHON_CMD}" -m {{app_name}} \
-    -c "config/base.yaml" \
     -c "config/local.yaml" \
     "${@}"
 popd > /dev/null

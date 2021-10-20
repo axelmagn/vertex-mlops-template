@@ -22,7 +22,7 @@ artifacts:
     location: "${_RELEASE_ARTIFACTS_DEST}"
     paths:
       - ${_RELEASE_CONFIG_TGT}
-      - ${_RELEASE_PIPELINES_TGT}/*
+      - "${_RELEASE_PIPELINES_TGT}/**"
       - ${_RELEASE_PIPELINES_MANIFEST_TGT}
       - ${_RELEASE_IMAGE_MANIFEST_TGT}
 

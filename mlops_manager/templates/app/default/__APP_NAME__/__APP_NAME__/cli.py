@@ -14,17 +14,11 @@ PARSER.add_argument("--log-level", type=str,
 PARSER.add_argument("--build-dir",
                     help="output directory for build targets.",
                     default="./build")
-PARSER.add_argument("-c", "--config-file",
-                    help="configuration file to load.  May be repeated.",
-                    action="append",
-                    dest="config_files",
-                    default=[])
-PARSER.add_argument("--config-string",
+PARSER.add_argument("-c", "--config-file", type=str, default=None,
+                    help="configuration file to load.  May be repeated.",)
+PARSER.add_argument("--config-string", type=str, default=None,
                     help="configuration string to load.  May be repeated. "
-                    + "Loaded after configuration files.",
-                    action="append",
-                    dest="config_strings",
-                    default=[])
+                    + "Loaded after configuration files.",)
 PARSER.add_argument("--out-file", type=str, default=None,
                     help="Output file (default: stdout)")
 
