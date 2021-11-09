@@ -36,6 +36,19 @@ def start_template(args):
         arg_name = template_context[key]
         template_context[key] = getattr(args, arg_name)
 
+    if "examples" in args:
+        for example in args.examples:
+            example_root = os.path.join(template_root, 'examples', example)
+            example_job = TemplateTreeJob(
+                template_root=example_root,
+                target_root=args.target_root,
+                exists_policy=args.on_exists,
+                filename_substitutions=filename_substitutions,
+                template_context=template_context,
+            )
+            example_job.run()
+        return
+
     template_job = TemplateTreeJob(
         template_root=variant_root,
         target_root=args.target_root,
@@ -44,14 +57,3 @@ def start_template(args):
         template_context=template_context,
     )
     template_job.run()
-
-    for example in args.examples:
-        example_root = os.path.join(template_root, 'examples', example)
-        example_job = TemplateTreeJob(
-            template_root=example_root,
-            target_root=args.target_root,
-            exists_policy=args.on_exists,
-            filename_substitutions=filename_substitutions,
-            template_context=template_context,
-        )
-        example_job.run()

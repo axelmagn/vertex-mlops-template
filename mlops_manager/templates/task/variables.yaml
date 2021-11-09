@@ -1,9 +1,16 @@
 args:
   app_name:
     help: "Name of the app"
+  task_name:
+    help: "Name of the task"
 
 filename_substitutions:
   __APP_NAME__: app_name
+  __TASK_NAME__: task_name
   
 template_context:
   app_name: app_name
+  task_name: task_name
+
+      
+    
