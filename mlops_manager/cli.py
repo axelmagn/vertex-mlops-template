@@ -12,7 +12,7 @@ _COMMANDS_PARSER = _PARSER.add_subparsers(title="commands", dest="command")
 
 def command(args=[], parent=_COMMANDS_PARSER, strict=True):
     """
-    Decorator for CLI commands. 
+    Decorator for CLI commands.
 
     see commands.py for examples.
     """

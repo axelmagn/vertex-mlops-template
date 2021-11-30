@@ -1,0 +1,16 @@
+args:
+  app_name:
+    help: "Name of the app"
+  pipeline_name:
+    help: "Name of the pipeline"
+
+filename_substitutions:
+  __APP_NAME__: app_name
+  __PIPELINE_NAME__: pipeline_name
+  
+template_context:
+  app_name: app_name
+  pipeline_name: pipeline_name
+
+      
+    

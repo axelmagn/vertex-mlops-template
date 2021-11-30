@@ -1,6 +1,6 @@
 from setuptools import find_packages, setup
 
-REQUIRED_PACKAGES = ['tensorflow_datasets~=4.2.0']
+REQUIRED_PACKAGES = []
 
 setup(
     name='{{app_name}}',
