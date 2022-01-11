@@ -1,0 +1,41 @@
+# Custom components can use a built version of the app's docker image to invoke 
+# tasks, or can use a command from an arbitrary docker image instead.
+# https://www.kubeflow.org/docs/components/pipelines/sdk/component-development/
+
+name: {{component_name}}
+description: # insert short description
+
+inputs:
+# - {name: Input 1, type: String, description: 'Data for input 1'}
+# - {name: Parameter 1, type: Integer, default: '100', description: 'Number of lines to copy'}
+
+outputs:
+# - {name: Output 1, type: String, description: 'Output 1 data.'}
+
+implementation:
+  container:
+
+    # fill in image field with strict image name.
+    # it is a best practice to use the strict image name in component 
+    # specifications. This ensures that the expected version is used in each 
+    # component execution.
+    image: # gcr.io/my-org/my-image@sha256:a172..752f
+
+    # command is a list of strings (command-line arguments). 
+    # The YAML language has two syntaxes for lists and you can use either of them. 
+    # Here we use the "flow syntax" - comma-separated strings inside square brackets.
+    command: [
+
+      # If using the app container, use this to invoke a custom task.
+      # python3, 
+      # -m,
+      # "{{app_name}}.tasks.<task_name>"
+
+      # Inputs and outputs should be passed as command line arguments as shown below.
+      # --input1-path,
+      # {inputPath: Input 1},
+      # --param1, 
+      # {inputValue: Parameter 1},
+      # --output1-path, 
+      # {outputPath: Output 1},
+    ]

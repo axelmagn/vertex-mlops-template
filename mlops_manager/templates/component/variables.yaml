@@ -1,0 +1,13 @@
+args:
+  app_name:
+    help: "Name of the app"
+  component_name:
+    help: "Name of the component"
+
+filename_substitutions:
+  __APP_NAME__: app_name
+  __PIPELINE_NAME__: component_name
+  
+template_context:
+  app_name: app_name
+  component_name: component_name
