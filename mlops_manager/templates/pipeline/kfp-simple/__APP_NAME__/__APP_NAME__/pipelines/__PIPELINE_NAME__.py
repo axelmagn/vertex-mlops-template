@@ -58,22 +58,22 @@ def pipeline(
     )
 
     # For custom training:
-    custom_training_job_run_op = gcc_aip.CustomContainerTrainingJobRunOp(
-        project=project_id,
-        display_name=f"{PIPELINE_NAME}_custom_training",
-        container_uri=app_container_uri,
-        # customize this command to invoke the appropriate custom training task
-        command=[
-            "python3",
-            "-m",
-            "{{app_name}}.tasks.<training_task>",
-        ],
-        dataset=ds_op.outputs["dataset"],
-        model_display_name=f"{PIPELINE_NAME}_model_custom",
-        training_fraction_split=0.6,
-        validation_fraction_split=0.2,
-        test_fraction_split=0.2,
-    )
+    # custom_training_job_run_op = gcc_aip.CustomContainerTrainingJobRunOp(
+    #     project=project_id,
+    #     display_name=f"{PIPELINE_NAME}_custom_training",
+    #     container_uri=app_container_uri,
+    #     # customize this command to invoke the appropriate custom training task
+    #     command=[
+    #         "python3",
+    #         "-m",
+    #         "{{app_name}}.tasks.<training_task>",
+    #     ],
+    #     dataset=ds_op.outputs["dataset"],
+    #     model_display_name=f"{PIPELINE_NAME}_model_custom",
+    #     training_fraction_split=0.6,
+    #     validation_fraction_split=0.2,
+    #     test_fraction_split=0.2,
+    # )
 
     # The third and fourth step are for deploying the model.
     create_endpoint_op = gcc_aip.EndpointCreateOp(
