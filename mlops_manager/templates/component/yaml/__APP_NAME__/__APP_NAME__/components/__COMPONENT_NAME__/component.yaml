@@ -19,17 +19,16 @@ implementation:
     # it is a best practice to use the strict image name in component 
     # specifications. This ensures that the expected version is used in each 
     # component execution.
-    image: # gcr.io/my-org/my-image@sha256:a172..752f
+    image: {{component_image}}
 
     # command is a list of strings (command-line arguments). 
     # The YAML language has two syntaxes for lists and you can use either of them. 
     # Here we use the "flow syntax" - comma-separated strings inside square brackets.
     command: [
 
-      # If using the app container, use this to invoke a custom task.
-      # python3, 
-      # -m,
-      # "{{app_name}}.tasks.<task_name>"
+      python3, 
+      -m,
+      "{{app_name}}.tasks.{{component_task}}"
 
       # Inputs and outputs should be passed as command line arguments as shown below.
       # --input1-path,

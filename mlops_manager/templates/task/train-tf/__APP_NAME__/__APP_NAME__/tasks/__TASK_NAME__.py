@@ -6,22 +6,6 @@ import os
 import tensorflow as tf
 
 
-def run(_args):
-    # validate and parse environment variables
-    if 'AIP_MODEL_DIR' not in os.environ:
-        raise KeyError(
-            'The `AIP_MODEL_DIR` environment variable has not been ' +
-            'set. See https://cloud.google.com/ai-platform-unified/docs/tutorials/image-recognition-custom/training'
-        )
-    output_directory = os.environ['AIP_MODEL_DIR']
-
-    dataset = load_data()
-    dataset = preprocess(dataset)
-    model = build_model()
-    model = train_model(model, dataset)
-    model.save(output_directory)
-
-
 def parse_args() -> argparse.Namespace:
     """Parse task arguments"""
     parser = argparse.ArgumentParser()
@@ -47,6 +31,9 @@ def preprocess(dataset) -> tf.data.Dataset:
 
     # perform any feature engineering or transformation necessary prior to
     # training.
+
+    # for more complex functionality, consider using a dedicated library
+
     return dataset
 
 
@@ -77,6 +64,22 @@ def train_model(model, dataset, epochs=10) -> tf.keras.Model:
     #   model = tf.keras.Sequential([model, tf.keras.layers.Softmax()])
 
     return model
+
+
+def run(_args):
+    # validate and parse environment variables
+    if 'AIP_MODEL_DIR' not in os.environ:
+        raise KeyError(
+            'The `AIP_MODEL_DIR` environment variable has not been ' +
+            'set. See https://cloud.google.com/ai-platform-unified/docs/tutorials/image-recognition-custom/training'
+        )
+    output_directory = os.environ['AIP_MODEL_DIR']
+
+    dataset = load_data()
+    dataset = preprocess(dataset)
+    model = build_model()
+    model = train_model(model, dataset)
+    model.save(output_directory)
 
 
 if __name__ == "__main__":

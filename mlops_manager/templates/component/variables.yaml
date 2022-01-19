@@ -3,6 +3,10 @@ args:
     help: "Name of the app"
   component_name:
     help: "Name of the component"
+  image:
+    help: "Strict image name of the component (format: gcr.io/project_id/image@sha256:a172..752f)"
+  task:
+    help: "task name of component entrypoint.  Must correspond to a task file in app's `tasks` source directory."
 
 filename_substitutions:
   __APP_NAME__: app_name
@@ -11,3 +15,5 @@ filename_substitutions:
 template_context:
   app_name: app_name
   component_name: component_name
+  component_image: image
+  component_task: task
