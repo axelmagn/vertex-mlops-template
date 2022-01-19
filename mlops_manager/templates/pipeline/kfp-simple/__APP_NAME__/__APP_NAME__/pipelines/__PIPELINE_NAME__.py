@@ -32,6 +32,10 @@ def pipeline(
     # output but not the actual returned object from the execution. The value
     # of the object is not accessible at the dsl.pipeline level, and can only be
     # retrieved by providing it as the input to a downstream component.
+    #
+    # Also see TabularDatasetCreateOp, TextDatasetCreateOp,
+    # TimeSeriesDatasetCreateOp, and VideoDatasetCreateOp:
+    # https://google-cloud-pipeline-components.readthedocs.io/en/google-cloud-pipeline-components-0.2.1/google_cloud_pipeline_components.aiplatform.html
     ds_op = gcc_aip.ImageDatasetCreateOp(
         project=project_id,
         display_name=f"{PIPELINE_NAME}_dataset_create",
