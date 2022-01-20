@@ -15,6 +15,7 @@ import yaml
     ],
 )
 def start_template(args):
+
     template_root = os.path.join(get_templates_dir(), args.template)
     variant_root = os.path.join(template_root, args.variant)
 

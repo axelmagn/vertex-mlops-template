@@ -1,1 +1,4 @@
-# TODO(axelmagn)
+google-cloud-aiplatform~=1.9
+google-cloud-pipeline-components~=0.2.1
+kfp~=1.8
+pytest~=6.2

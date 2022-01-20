@@ -5,7 +5,7 @@ from typing import Dict, Any
 from google.cloud import aiplatform
 from google_cloud_pipeline_components import aiplatform as gcc_aip
 
-PIPELINE_NAME = "{{pipeline_name}}".sub('_', '-')
+PIPELINE_NAME = "{{pipeline_name}}".replace('_', '-')
 
 
 @kfp.dsl.pipeline(
@@ -93,7 +93,9 @@ def pipeline(
     )
 
 
-def compile(package_path: str):
+def compile(
+    package_path: str,
+):
     compiler.Compiler().compile(
         pipeline_func=pipeline,
         package_path=package_path,
