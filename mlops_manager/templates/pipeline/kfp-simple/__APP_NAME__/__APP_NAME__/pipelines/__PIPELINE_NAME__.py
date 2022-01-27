@@ -52,7 +52,6 @@ def pipeline(
         display_name=f"{PIPELINE_NAME}_training",
         prediction_type="classification",
         model_type="CLOUD",
-        base_model=None,
         dataset=ds_op.outputs["dataset"],
         model_display_name="iris-classification-model-mbsdk",
         training_fraction_split=0.6,

@@ -1,25 +1,31 @@
 options:
   dynamic_substitutions: True
   substitution_option: 'ALLOW_LOOSE'
+  # Set a fairly long timeout to allow for long pipeline execution times during 
+  # deployment.
+  timeout: 8h
 
 substitutions:
   # Name of the app
   _APP_NAME: "{{app_name}}"
-  
-  # deployment region
-  _ARTIFACT_REPO_REGION: "{{gcp_region}}"
-  _ARTIFACT_REPO_NAME: "${PROJECT_ID}" # TODO(author): override with artifact registry repo name
 
   # Unique label for artifacts resulting from this build.
   _BUILD_LABEL: "build-${SHORT_SHA:-local}"
+  
+  # Artifact Registry Repository
+  _ARTIFACT_REPO: "{{artifact_repo}}"
+
+  # Artifact Registry Repository
+  _ARTIFACT_GCS_ROOT: "{{artifact_gcs_root}}" # GCS bucket path to put
+  
 
   # Docker image URI for resulting image
-  _IMAGE_TARGET: "${_ARTIFACT_REPO_REGION}-docker.pkg.dev/${PROJECT_ID}/${_ARTIFACT_REPO_NAME}/${_APP_NAME}:${_BUILD_LABEL}"
+  _IMAGE_TARGET: "${_ARTIFACT_REPO}/${_APP_NAME}:${_BUILD_LABEL}"
   
   # Main pipeline to deploy
   # TODO(author): define this variable if this workflow includes a deploy step
-  _DEPLOY_PIPELINE_NAME: # specify a pipeline defined in {{app_name}}.pipelines
-  _DEPLOY_PIPELINE_ROOT: # specify GCS path to use as root of pipeline execution
+  _DEPLOY_PIPELINE_NAME: "{{pipeline_name}}"
+  _DEPLOY_PIPELINE_ROOT: "{{pipeline_root}}"
   _DEPLOY_PIPELINE_RUN_ID: ${_DEPLOY_PIPELINE_NAME}-${BUILD_LABEL}
 
 steps:
@@ -43,33 +49,32 @@ steps:
     args: ['push',  '${_IMAGE_TARGET}']
     
   # Compile Deployment Pipeline
-  # TODO(author): adapt this section to compile and submit any pipelines
-  # - name: '${_IMAGE_TARGET}'
-  #   entrypoint: python
-  #   args: [
-  #     "-m", "${_APP_NAME}.pipelines.${_DEPLOY_PIPELINE_NAME}", 
-  #     "compile", 
-  #     "-o", "${_DEPLOY_PIPELINE_RUN_ID}.json",
-  #   ]
+  - name: '${_IMAGE_TARGET}'
+    entrypoint: python
+    args: [
+      "-m", "${_APP_NAME}.pipelines.${_DEPLOY_PIPELINE_NAME}", 
+      "compile", 
+      "-o", "${_DEPLOY_PIPELINE_NAME}.json",
+    ]
 
   # Run Deployment Pipeline
-  # - name: '${_IMAGE_TARGET}'
-  #   entrypoint: python
-  #   args: [
-  #     "-m", "${_APP_NAME}.pipelines.${_DEPLOY_PIPELINE_NAME}", 
-  #     "run", 
-  #     "--package", "${_DEPLOY_PIPELINE_RUN_ID}.json",
-  #     "--pipeline_root", "${_DEPLOY_PIPELINE_ROOT}",
-  #     "--project", "${PROJECT_ID}",
-  #   ]
+  - name: '${_IMAGE_TARGET}'
+    entrypoint: python
+    args: [
+      "-m", "${_APP_NAME}.pipelines.${_DEPLOY_PIPELINE_NAME}", 
+      "run", 
+      "--package", "${_DEPLOY_PIPELINE_NAME}.json",
+      "--pipeline_root", "${_DEPLOY_PIPELINE_ROOT}",
+      "--project", "${PROJECT_ID}",
+    ]
 
 # Save test logs to Google Cloud Storage
 artifacts:
   objects:
-    location: gs://${_BUCKET_NAME}/
+    location: ${_ARTIFACT_GCS_ROOT}
     paths:
-      - ${SHORT_SHA}_test_log.xml
-      # - ${_DEPLOY_PIPELINE_RUN_ID}.json 
+      - ${_BUILD_LABEL}_test_log.xml
+      - ${_DEPLOY_PIPELINE_NAME}.json 
 
 # Store images in Google Artifact Registry
 images:

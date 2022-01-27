@@ -10,22 +10,14 @@ FROM python:3-slim
 
 RUN pip install --upgrade pip
 
-# create a non-root user to run app
-RUN groupadd -r worker && useradd --no-log-init -r -g worker --create-home worker
-USER worker
+RUN mkdir -p /app
+WORKDIR /app
 
-# add the local pip directory to path
-RUN mkdir -p /home/worker/.local/bin
-ENV PATH="/home/worker/.local/bin:${PATH}"
-
-RUN mkdir -p /home/worker/app
-WORKDIR /home/worker/app
-
-COPY --chown=worker:worker requirements.txt requirements.txt
-RUN pip install --no-cache-dir --user -r requirements.txt
+COPY requirements.txt requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
 
-COPY --chown=worker:worker . .
-RUN pip install --user .
+COPY . .
+RUN pip install .
 
 CMD ["python"]

@@ -1,0 +1,25 @@
+args:
+  app_name:
+    help: Name of the app
+  gcp_region:
+    help: GCP Region
+    default: us-central1
+  artifact_repo:
+    help: Artifact Registry Repository URL for docker images
+  artifact_gcs_root:
+    help: GCS root path for file artifacts
+  pipeline_name:
+    help: Name of the pipeline to be deployed
+  pipeline_root:
+    help: GCS root path for pipeline execution
+
+filename_substitutions:
+  __APP_NAME__: app_name
+  
+template_context:
+  app_name: app_name
+  gcp_region: gcp_region
+  artifact_repo: artifact_repo
+  artifact_gcs_root: artifact_gcs_root
+  pipeline_name: pipeline_name
+  pipeline_root: pipeline_root
