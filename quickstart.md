@@ -166,6 +166,8 @@ python -m iris_quickstart.pipelines.iris_train_deploy compile \
     --output iris_train_deploy.json
 ```
 
+**Note:** The command below can take a long time to execute.
+
 ```
 python -m iris_quickstart.pipelines.iris_train_deploy run \
     --package iris_train_deploy.json \
@@ -220,6 +222,8 @@ container for our app and submit the pipeline.
 This will create a `cloudbuild.yaml` file in your app directory which builds,
 tests, and deploys the `iris_train_deploy` pipeline.  You can submit this as
 a cloud build job with the following command:
+
+**Note:** The command below can take a long time to execute.
 
 ```
 gcloud builds submit
