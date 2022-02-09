@@ -1,9 +1,6 @@
 options:
   dynamic_substitutions: True
   substitution_option: 'ALLOW_LOOSE'
-  # Set a fairly long timeout to allow for long pipeline execution times during 
-  # deployment.
-  timeout: 8h
 
 substitutions:
   # Name of the app
@@ -28,20 +25,22 @@ substitutions:
   _DEPLOY_PIPELINE_ROOT: "{{pipeline_root}}"
   _DEPLOY_PIPELINE_RUN_ID: ${_DEPLOY_PIPELINE_NAME}-${BUILD_LABEL}
 
+# Set a fairly long timeout (8 hours) to allow for long pipeline execution times
+# during deployment.
+timeout: 28800s
+
 steps:
-  # Install dependencies
-  - name: python
-    entrypoint: pip
-    args: ["install", "-r", "requirements.txt", "--user"]
-
-  # Run unit tests
-  - name: python
-    entrypoint: python
-    args: ["-m", "pytest", "--junitxml=${_BUILD_LABEL}_test_log.xml"] 
-
   # Docker Build
   - name: 'gcr.io/cloud-builders/docker'
     args: ['build', '-t', '${_IMAGE_TARGET}', '.']
+
+  # Run unit tests
+  - name: '${_IMAGE_TARGET}'
+    entrypoint: python
+    args: [
+      "-m", "pytest",
+      "--junitxml=${_BUILD_LABEL}_test_log.xml",
+    ]
     
   # Docker push to Google Artifact Registry
   # only necessary if this workflow also deploys pipelines
