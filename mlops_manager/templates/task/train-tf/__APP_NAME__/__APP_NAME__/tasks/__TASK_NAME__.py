@@ -1,4 +1,4 @@
-"""TODO(author): a brief docstring describing the task"""
+"""a brief docstring describing the task"""
 
 import argparse
 import os

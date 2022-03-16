@@ -7,5 +7,5 @@ setup(
     version='1.0',
     install_requires=REQUIRED_PACKAGES,
     packages=find_packages(),
-    description='',  # TODO(author): description
+    description='',  # a brief description of the app (optional)
 )

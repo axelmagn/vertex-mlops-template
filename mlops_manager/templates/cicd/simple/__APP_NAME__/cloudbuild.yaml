@@ -20,7 +20,7 @@ substitutions:
   _IMAGE_TARGET: "${_ARTIFACT_REPO}/${_APP_NAME}:${_BUILD_LABEL}"
   
   # Main pipeline to deploy
-  # TODO(author): define this variable if this workflow includes a deploy step
+  # define this variable if the workflow includes a deploy step
   _DEPLOY_PIPELINE_NAME: "{{pipeline_name}}"
   _DEPLOY_PIPELINE_ROOT: "{{pipeline_root}}"
   _DEPLOY_PIPELINE_RUN_ID: ${_DEPLOY_PIPELINE_NAME}-${BUILD_LABEL}

@@ -17,15 +17,28 @@ complete:
 1. Select or create a google cloud project, and note its ID for later.  We will
     refer to it in this guide as `PROJECT_ID`.  
     ([project selector](https://console.cloud.google.com/projectselector2/home/dashboard))
+    
+    ```
+    export PROJECT_ID=... # your project ID here
+    ```
+    
 2. Select a location for your project resources and make a note of it -- for
     example, `us-central1`. (Some Vertex services require co-location between
     tasks, so it is advised that all Vertex worloads run in the same region). We
     will refer to it in this guide as `REGION`.
+    
+    ```
+    export REGION=us-central1 # you can replace this with your preferred region 
+    ```
+    
 2. Make sure that billing is enabled for your cloud project.
     ([documentation](https://cloud.google.com/billing/docs/how-to/modify-project#confirm_billing_is_enabled_on_a_project))
+    
 3. Enable the Vertex AI and Cloud Storage APIs. 
     ([enable the APIs](https://console.cloud.google.com/flows/enableapi?apiid=aiplatform.googleapis.com,storage-component.googleapis.com))
+    
 4. Install and initialize the Google Cloud CLI. ([documentation](https://cloud.google.com/sdk/docs/install))
+
 5. Update and install `gcloud` components:
     ```
     gcloud components update && \
@@ -33,9 +46,13 @@ complete:
     ```
 6. Configure a cloud storage bucket for the project:
     ```
-    gsutil mb -p PROJECT_ID -l REGION gs://BUCKET_NAME
+    export BUCKET_NAME=... # your bucket name here (no 'gs://' in front)
     ```
-    We will refer to it in this guide as `BUCKET_NAME`
+
+    ```
+    # if necessary, create the bucket
+    gsutil mb -p ${PROJECT_ID} -l REGION gs://${BUCKET_NAME}
+    ```
 7. Install python, virtualenv, and pip locally. (methods vary)
 
 For the CICD section of this guide, the following steps must also be completed:
@@ -43,6 +60,11 @@ For the CICD section of this guide, the following steps must also be completed:
 1. Select or create a Docker Artifact Registry.  We will refer to it as
     `ARTIFACT_REPO`. 
     ([documentation](https://cloud.google.com/artifact-registry/docs/docker/quickstart))
+    
+    ```
+    export ARTIFACT_REPO=... # your artifact repo here (only required for CICD)
+    ```
+
 2. Enable the Cloud Build APIs. 
     ([enable the APIs](https://console.cloud.google.com/flows/enableapi?apiid=cloudbuild.googleapis.com,%20artifactregistry.googleapis.com))
 
@@ -50,6 +72,11 @@ For the CICD section of this guide, the following steps must also be completed:
 development machine.  However it is also possible to follow this guide on a
 user-managed Vertex Workbench instance. 
 ([documentation](https://cloud.google.com/vertex-ai/docs/workbench/user-managed/quickstart-create-console))
+
+```
+export PROJECT_ID= # your project ID here
+export BUCKET_NAME= # your bucket name here
+```
     
 ## Clone the Repository
 
@@ -74,11 +101,15 @@ pip install -r requirements.txt
 ## Create an App
 
 First, create an app.  The default code we will use performs classification on
-the public [Iris Flower Dataset](https://archive.ics.uci.edu/ml/datasets/iris),
-so let's call this app `iris_quickstart`. 
+the public [flowers Flower Dataset](https://archive.ics.uci.edu/ml/datasets/flowers),
+so let's call this app `flowers_quickstart`. 
 
 ```
-./bin/manage.sh start app --app-name iris_quickstart
+export APP_NAME=flowers_quickstart
+```
+
+```
+./bin/manage.sh start app --app-name ${APP_NAME}
 ```
 
 **Note: Mind your hyphens and underscores.**  At the moment, there is little to
@@ -91,10 +122,13 @@ possible that it's a typo.
 This will create a new app folder in your project, which should look like this:
 
 ```
-$ tree iris_quickstart/
-iris_quickstart/
+tree ${APP_NAME}/
+```
+
+```
+flowers_quickstart/
 ├── Dockerfile
-├── iris_quickstart
+├── flowers_quickstart
 │   ├── components
 │   │   └── __init__.py
 │   ├── data.py
@@ -126,19 +160,24 @@ organize an AI project.
 ## Create a Pipeline
 
 We now have an app, but it doesn't do much yet.  Let's create a Vertex pipeline 
-called `iris_train_deploy` that will train and deploy our model.  The pipeline
+called `flowers_train_deploy` that will train and deploy our model.  The pipeline
 template trains and deploys an AutoML model on this dataset by default, so no
 code modification will be necessary.
 
+
+```
+export PIPELINE_NAME=flowers_train_deploy
+```
+
 ```
 ./bin/manage.sh start pipeline \
-    --app-name iris_quickstart \
-    --pipeline-name iris_train_deploy
+    --app-name ${APP_NAME} \
+    --pipeline-name ${PIPELINE_NAME}
 ```
 
 This will create new pipeline and test files located within the
-`iris_quickstart/iris_quickstart/pipelines` directory. If you inspect them with
-a code editor, you will find that `iris_train_deploy.py` defines a `pipeline`
+`flowers_quickstart/flowers_quickstart/pipelines` directory. If you inspect them with
+a code editor, you will find that `flowers_train_deploy.py` defines a `pipeline`
 function, but can also function as a command line script to compile and run
 the pipeline.  You can customize this functionality by modifying the `compile`, 
 `run_job` and `parse_args` functions.
@@ -150,10 +189,10 @@ with the following commands:
 
 **Important**: The following command changes the working directory to that of 
 the recently created app.  Subsequent quickstart sections will assume that your
-working directory is now `iris_quickstart/`.
+working directory is now `flowers_quickstart/`.
 
 ```
-cd iris_quickstart
+cd ${APP_NAME}
 ```
 
 ```
@@ -162,17 +201,17 @@ pip install -r requirements.txt
 ```
 
 ```
-python -m iris_quickstart.pipelines.iris_train_deploy compile \
-    --output iris_train_deploy.json
+python -m ${APP_NAME}.pipelines.${PIPELINE_NAME} compile \
+    --output ${PIPELINE_NAME}.json
 ```
 
 **Note:** The command below can take a long time to execute.
 
 ```
-python -m iris_quickstart.pipelines.iris_train_deploy run \
-    --package iris_train_deploy.json \
-    --pipeline_root gs://BUCKET_NAME/iris_quickstart/iris_train_deploy \
-    --project PROJECT_ID
+python -m ${APP_NAME}.pipelines.${PIPELINE_NAME} run \
+    --package ${PIPELINE_NAME}.json \
+    --pipeline_root gs://${BUCKET_NAME}/${APP_NAME}/${PIPELINE_NAME} \
+    --project ${PROJECT_ID}
 ```
 
 ## (Optional) Iterate in a Notebook
@@ -185,7 +224,7 @@ and tools in a notebook using the following commands:
 
 ```
 pip install jupyter
-pip install -e iris_quickstart
+pip install -e ${APP_NAME}
 jupyter notebooks
 ```
 
@@ -211,16 +250,16 @@ container for our app and submit the pipeline.
 
 ```
 ../bin/manage.sh start cicd \
-    --app-name iris_quickstart \
-    --gcp-region REGION \
-    --artifact-repo ARTIFACT_REPO \
-    --artifact-gcs-root gs://BUCKET_NAME/iris_quickstart/build \
-    --pipeline-name iris_train_deploy \
-    --pipeline-root gs://BUCKET_NAME/iris_quickstart/iris_train_deploy
+    --app-name ${APP_NAME} \
+    --gcp-region ${REGION} \
+    --artifact-repo ${ARTIFACT_REPO} \
+    --artifact-gcs-root gs://${BUCKET_NAME}/${APP_NAME}/build \
+    --pipeline-name ${PIPELINE_NAME} \
+    --pipeline-root gs://${BUCKET_NAME}/${APP_NAME}/${PIPELINE_NAME}
 ```
 
 This will create a `cloudbuild.yaml` file in your app directory which builds,
-tests, and deploys the `iris_train_deploy` pipeline.  You can submit this as
+tests, and deploys the `flowers_train_deploy` pipeline.  You can submit this as
 a cloud build job with the following command:
 
 **Note:** The command below can take a long time to execute.
