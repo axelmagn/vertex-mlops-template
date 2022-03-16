@@ -101,11 +101,11 @@ pip install -r requirements.txt
 ## Create an App
 
 First, create an app.  The default code we will use performs classification on
-the public [Iris Flower Dataset](https://archive.ics.uci.edu/ml/datasets/iris),
-so let's call this app `iris_quickstart`. 
+the public [flowers Flower Dataset](https://archive.ics.uci.edu/ml/datasets/flowers),
+so let's call this app `flowers_quickstart`. 
 
 ```
-export APP_NAME=iris_quickstart
+export APP_NAME=flowers_quickstart
 ```
 
 ```
@@ -126,9 +126,9 @@ tree ${APP_NAME}/
 ```
 
 ```
-iris_quickstart/
+flowers_quickstart/
 ├── Dockerfile
-├── iris_quickstart
+├── flowers_quickstart
 │   ├── components
 │   │   └── __init__.py
 │   ├── data.py
@@ -160,13 +160,13 @@ organize an AI project.
 ## Create a Pipeline
 
 We now have an app, but it doesn't do much yet.  Let's create a Vertex pipeline 
-called `iris_train_deploy` that will train and deploy our model.  The pipeline
+called `flowers_train_deploy` that will train and deploy our model.  The pipeline
 template trains and deploys an AutoML model on this dataset by default, so no
 code modification will be necessary.
 
 
 ```
-export PIPELINE_NAME=iris_train_deploy
+export PIPELINE_NAME=flowers_train_deploy
 ```
 
 ```
@@ -176,8 +176,8 @@ export PIPELINE_NAME=iris_train_deploy
 ```
 
 This will create new pipeline and test files located within the
-`iris_quickstart/iris_quickstart/pipelines` directory. If you inspect them with
-a code editor, you will find that `iris_train_deploy.py` defines a `pipeline`
+`flowers_quickstart/flowers_quickstart/pipelines` directory. If you inspect them with
+a code editor, you will find that `flowers_train_deploy.py` defines a `pipeline`
 function, but can also function as a command line script to compile and run
 the pipeline.  You can customize this functionality by modifying the `compile`, 
 `run_job` and `parse_args` functions.
@@ -189,7 +189,7 @@ with the following commands:
 
 **Important**: The following command changes the working directory to that of 
 the recently created app.  Subsequent quickstart sections will assume that your
-working directory is now `iris_quickstart/`.
+working directory is now `flowers_quickstart/`.
 
 ```
 cd ${APP_NAME}
@@ -259,7 +259,7 @@ container for our app and submit the pipeline.
 ```
 
 This will create a `cloudbuild.yaml` file in your app directory which builds,
-tests, and deploys the `iris_train_deploy` pipeline.  You can submit this as
+tests, and deploys the `flowers_train_deploy` pipeline.  You can submit this as
 a cloud build job with the following command:
 
 **Note:** The command below can take a long time to execute.
